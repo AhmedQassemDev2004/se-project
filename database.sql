@@ -37,7 +37,7 @@ CREATE TABLE Votes (
                        question_id INT,
                        type ENUM('upvote', 'downvote') NOT NULL,
                        FOREIGN KEY (user_id) REFERENCES Users(user_id),
-                        FOREIGN KEY (question_id) REFERENCES Questions(question_id)
+                        FOREIGN KEY (question_id) REFERENCES Questions(question_id),
 );
 
 CREATE TABLE Tags (
