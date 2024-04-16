@@ -6,7 +6,7 @@ CREATE TABLE Users (
                        photo VARCHAR(255),
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        reputations INT,
-                       role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER reputations
+                       role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER reputations,
 );
 
 CREATE TABLE Questions (
@@ -28,14 +28,16 @@ CREATE TABLE Answers (
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          reputations INT,
                          FOREIGN KEY (user_id) REFERENCES Users(user_id),
-                         FOREIGN KEY (question_id) REFERENCES Questions(question_id)
+                         FOREIGN KEY (question_id) REFERENCES Questions(question_id),
 );
 
 CREATE TABLE Votes (
                        vote_id INT PRIMARY KEY AUTO_INCREMENT,
                        user_id INT,
+                       question_id INT,
                        type ENUM('upvote', 'downvote') NOT NULL,
-                       FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                       FOREIGN KEY (user_id) REFERENCES Users(user_id),
+                        FOREIGN KEY (question_id) REFERENCES Questions(question_id)
 );
 
 CREATE TABLE Tags (

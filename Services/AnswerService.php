@@ -72,5 +72,3 @@ class AnswerService implements Service
         $stmt->execute(['answer_id' => $id]);
     }
 }
-
-?>
