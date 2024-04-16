@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\src\Models\Answer;
+use App\Models\Answer;
 use App\Utils\DBConnection;
 use PDO;
 

@@ -13,7 +13,6 @@ class AuthService
         }
     }
 
-
     public function auth(string $username): bool
     {
         $_SESSION['username'] = $username;

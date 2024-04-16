@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\src\Models\Tag;
+use App\Models\Tag;
 use App\Utils\DBConnection;
 use PDO;
 
@@ -59,4 +59,3 @@ class TagService implements Service
         $stmt->execute(['tag_id' => $id]);
     }
 }
-
