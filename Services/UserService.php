@@ -125,7 +125,7 @@ class UserService implements Service
         return null;
     }
 
-    public function getUserByEmail(string $email)
+    public function getUserByEmail(string $email): ?User
     {
         $query = "SELECT * FROM Users WHERE email = :email";
         $stmt = $this->db->prepare($query);

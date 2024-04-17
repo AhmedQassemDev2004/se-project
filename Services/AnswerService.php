@@ -71,7 +71,6 @@ class AnswerService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['answer_id' => $id]);
     }
-
     public function getAnswersByQuestionID($questionID) {
         $query = "SELECT * FROM Answers WHERE question_id = ?";
         $stmt = $this->db->prepare($query);

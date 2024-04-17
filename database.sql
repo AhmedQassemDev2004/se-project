@@ -1,13 +1,15 @@
+
 CREATE TABLE Users (
-                       user_id INT PRIMARY KEY AUTO_INCREMENT,
-                       username VARCHAR(50) UNIQUE NOT NULL,
-                       email VARCHAR(100) UNIQUE NOT NULL,
-                       password VARCHAR(100) NOT NULL,
-                       photo VARCHAR(255),
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       reputations INT,
-                       role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER reputations
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    photo VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reputations INT,
+    role ENUM('admin', 'user') NOT NULL DEFAULT 'user'
 );
+
 
 CREATE TABLE Questions (
                            question_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -21,21 +23,23 @@ CREATE TABLE Questions (
 );
 
 CREATE TABLE Answers (
-                         answer_id INT PRIMARY KEY AUTO_INCREMENT,
-                         user_id INT,
-                         question_id INT,
-                         body TEXT NOT NULL,
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         reputations INT,
-                         FOREIGN KEY (user_id) REFERENCES Users(user_id),
-                         FOREIGN KEY (question_id) REFERENCES Questions(question_id)
+    answer_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    question_id INT,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reputations INT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (question_id) REFERENCES Questions(question_id)
 );
 
 CREATE TABLE Votes (
                        vote_id INT PRIMARY KEY AUTO_INCREMENT,
                        user_id INT,
+                       question_id INT,
                        type ENUM('upvote', 'downvote') NOT NULL,
-                       FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                       FOREIGN KEY (user_id) REFERENCES Users(user_id),
+                        FOREIGN KEY (question_id) REFERENCES Questions(question_id),
 );
 
 CREATE TABLE Tags (
