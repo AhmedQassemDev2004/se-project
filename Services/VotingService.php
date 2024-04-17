@@ -17,10 +17,13 @@ class VotingService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function create(Vote $data, string $for = "question")
+    public function create(object $data) {
+
+    }
+
+    public function add_vote(object $data, string $for = "question")
     {
         if($for == "question") {
-
             // Check if the user has already voted on this question
             $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
             $stmt = $this->db->prepare($query);

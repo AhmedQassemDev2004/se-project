@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Email already exists.";
     } else {
         $user = new User(0, $username, $email, password_hash($password, PASSWORD_DEFAULT), null, date("Y-m-d H:i:s"), 0, 'user');
-        $userId = $userService->create($user);
+        $userId = $userService->add_vote($user);
         if ($userId) {
             (new \App\Services\AuthService())->auth($username);
             header("Location: ".$domain);

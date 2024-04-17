@@ -16,7 +16,7 @@ class UserService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function create(object $data): int
+    public function add_vote(object $data): int
     {
         $query = "INSERT INTO Users (username, email, password, photo, created_at, reputations, role) 
                   VALUES (:username, :email, :password, :photo, :created_at, :reputations, :role)";
