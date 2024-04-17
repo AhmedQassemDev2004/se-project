@@ -1,7 +1,11 @@
 <?php
 
-require __DIR__."/../vendor/autoload.php";
-require_once __DIR__."/../Utils/config.php";
+use App\Services\AuthService;
+
+require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../Utils/config.php';
+
+$authService = new AuthService();
 ?>
 
 <html>
@@ -12,32 +16,30 @@ require_once __DIR__."/../Utils/config.php";
 <body>
 <nav class="navbar navbar-dark navbar-expand-lg bg-dark ">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar scroll</a>
+        <a class="navbar-brand" href="<?php echo $domain; ?>">Knowledge</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarScroll">
             <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link active" aria-current="page" href="<?php echo $domain; ?>">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Link
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Link</a>
-                </li>
+                <?php if (!$authService->isLoggedIn()) : ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo $domain; ?>login.php">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo $domain; ?>register.php">Register</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Welcome, <?php echo $authService->getCurrentUser()->username; ?> </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link logout-btn" href="<?php echo $domain; ?>logout.php">Logout</a>
+                    </li>
+                <?php endif ?>
             </ul>
             <form class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -46,3 +48,34 @@ require_once __DIR__."/../Utils/config.php";
         </div>
     </div>
 </nav>
+
+<div class="modal fade" id="logoutConfirmationModal" tabindex="-1" aria-labelledby="logoutConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutConfirmationModalLabel">Confirm Logout</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to logout?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="logoutLink" href="<?php echo $domain; ?>logout.php" class="btn btn-primary">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script  src="<?php echo $domain;?>/js/bootstrap.min.js"></script>
+<script>
+    // JavaScript to handle logout confirmation
+    document.addEventListener("DOMContentLoaded", function() {
+        var logoutButton = document.querySelector('.logout-btn');
+        logoutButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            var logoutConfirmationModal = new bootstrap.Modal(document.getElementById('logoutConfirmationModal'));
+            logoutConfirmationModal.show();
+        });
+    });
+</script>

@@ -7,9 +7,9 @@ use PDO;
 class DBConnection
 {
     private string $host = 'localhost';
-    private string $db_name = 'se-project';
-    private string $username = 'root';
-    private string $password = '';
+    private string $db_name = 'se_project';
+    private string $username = 'student';
+    private string $password = 'student';
     private $conn = null;
 
     public function getConnection()
