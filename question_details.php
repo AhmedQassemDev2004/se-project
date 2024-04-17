@@ -1,5 +1,7 @@
 <?php
 
+namespace App;
+
 require_once __DIR__."/vendor/autoload.php";
 require_once __DIR__."/partials/header.php";
 
@@ -22,15 +24,12 @@ $voteService = new VotingService();
 $tags = $tagService->getAll();
 
 $logged_in_user = $authService->getCurrentUser();
-if ($logged_in_user->getRole() == "user") {
-    $isAdmin = false;
-} else {
-    $isAdmin = true;
-}
+$userID = $logged_in_user->getUserId();
+$isAdmin = $logged_in_user->getRole() == "admin";
 
 
 // Retrieve the question ID from the URL parameter
-if (isset($_GET['id']) && !empty($_GET['id'])) {
+if (isset($_GET['id'])) {
     $questionId = $_GET['id'];
 
     $question = $questionService->getById($questionId);
@@ -40,6 +39,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     header("Location: index.php");
     exit();
 }
+
 
 // Handle delete question submission
 if (isset($_POST['delete_question'])) {
@@ -57,7 +57,7 @@ if (isset($_POST['vote_type'])) {
     $userID = $_POST['user_id'];
     $voteType = $_POST['vote_type'];
 
-    $vote = new Vote($logged_in_user->getUserId(), $questionID, $voteType);
+    $vote = new Vote($logged_in_user->getUserId(), $questionID, 0, $voteType);
 
     // Handle the reputation process
     $reputation = $question->getReputations();
@@ -89,15 +89,15 @@ if (isset($_POST['vote_type'])) {
 if (isset($_POST['submit_answer'])) {
     $answerText = $_POST['answer'];
     $questionID = $_POST['question_id'];
-    
+
     $currentDateTime = date("Y-m-d H:i:s");
     // Create an Answer object
     $answer = new Answer($logged_in_user->getUserId(), $questionID, $answerText, $currentDateTime, null, null);
-    
+
     // Use the AnswerService to save the answer
     $answerService = new AnswerService();
     $answerService->create($answer);
-    
+
     // Redirect the user back to the same page or display a success message
     header("Location: question_details.php?id=" . $questionID);
     exit();
