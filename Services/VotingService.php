@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Answer;
 use App\Models\Vote;
 use App\Utils\DBConnection;
 use PDO;
@@ -16,30 +17,60 @@ class VotingService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function create(object $data)
-    {
-        // Check if the user has already voted on this question
-        $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['question_id' => $data->getQuestionId(), 'user_id' => $data->getUserId()]);
-        $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+    public function create(object $data) {
 
-        if ($voteData) {
-            // Update the existing vote
-            $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
+    }
+
+    public function add_vote(object $data, string $for = "question")
+    {
+        if($for == "question") {
+            // Check if the user has already voted on this question
+            $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
-            return false;
+            $stmt->execute(['question_id' => $data->getQuestionId(), 'user_id' => $data->getUserId()]);
+            $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($voteData) {
+                // Update the existing vote
+                $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
+                return false;
+            } else {
+                // Insert a new vote
+                $query = "INSERT INTO Votes (user_id, question_id, type) VALUES (:user_id, :question_id, :type)";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
+                    'user_id' => $data->getUserId(),
+                    'question_id' => $data->getQuestionId(),
+                    'type' => $data->getVoteType()
+                ]);
+                return true;
+            }
         } else {
-            // Insert a new vote
-            $query = "INSERT INTO Votes (user_id, question_id, type) VALUES (:user_id, :question_id, :type)";
+            // Check if the user has already voted on this question
+            $query = "SELECT * FROM Votes WHERE answer_id = :answer_id AND user_id = :user_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute([
-                'user_id' => $data->getUserId(),
-                'question_id' => $data->getQuestionId(),
-                'type' => $data->getVoteType()
-            ]);
-            return true;
+            $stmt->execute(['answer_id' => $data->getAnswerId(), 'user_id' => $data->getUserId()]);
+            $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($voteData) {
+                // Update the existing vote
+                $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
+                return false;
+            } else {
+                // Insert a new vote
+                $query = "INSERT INTO Votes (user_id, answer_id, type) VALUES (:user_id, :answer_id, :type)";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
+                    'user_id' => $data->getUserId(),
+                    'answer_id' => $data->getAnswerId(),
+                    'type' => $data->getVoteType()
+                ]);
+                return true;
+            }
         }
     }
 
@@ -106,5 +137,23 @@ class VotingService implements Service
         $query = "DELETE FROM Votes WHERE user_id = :user_id AND question_id = :question_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['user_id' => $user_id, 'question_id' => $question_id]);
+    }
+
+    public function getUpvotesCountForAnswers(int $answerId): int
+    {
+        $query = "SELECT COUNT(*) AS upvotes_count FROM Votes WHERE answer_id = :answer_id AND type = 'upvote'";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['answer_id' => $answerId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['upvotes_count'];
+    }
+
+    public function getDownvotesCountForAnswers(int $answerId): int
+    {
+        $query = "SELECT COUNT(*) AS downvotes_count FROM Votes WHERE answer_id = :answer_id AND type = 'downvote'";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['answer_id' => $answerId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['downvotes_count'];
     }
 }

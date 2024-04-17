@@ -1,5 +1,7 @@
 <?php
 
+namespace App;
+
 require_once __DIR__."/vendor/autoload.php";
 require_once __DIR__."/partials/header.php";
 
@@ -22,15 +24,12 @@ $voteService = new VotingService();
 $tags = $tagService->getAll();
 
 $logged_in_user = $authService->getCurrentUser();
-if ($logged_in_user->getRole() == "user") {
-    $isAdmin = false;
-} else {
-    $isAdmin = true;
-}
+$userID = $logged_in_user->getUserId();
+$isAdmin = $logged_in_user->getRole() == "admin";
 
 
 // Retrieve the question ID from the URL parameter
-if (isset($_GET['id']) && !empty($_GET['id'])) {
+if (isset($_GET['id'])) {
     $questionId = $_GET['id'];
 
     $question = $questionService->getById($questionId);
@@ -40,6 +39,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     header("Location: index.php");
     exit();
 }
+
 
 // Handle delete question submission
 if (isset($_POST['delete_question'])) {
@@ -52,17 +52,17 @@ if (isset($_POST['delete_question'])) {
 }
 
 // Handle voting
-if (isset($_POST['vote_type'])) {
+if (isset($_POST['vote_question'])) {
     $questionID = $_POST['question_id'];
     $userID = $_POST['user_id'];
     $voteType = $_POST['vote_type'];
 
-    $vote = new Vote($logged_in_user->getUserId(), $questionID, $voteType);
+    $vote = new Vote($logged_in_user->getUserId(), $questionID, 0, $voteType);
 
     // Handle the reputation process
     $reputation = $question->getReputations();
 
-    if ($voteService->create($vote)) {
+    if ($voteService->add_vote($vote)) {
         if ($voteType == "upvote") {
             $reputation += 1;
         } else {
@@ -85,19 +85,60 @@ if (isset($_POST['vote_type'])) {
     exit;
 }
 
+if (isset($_POST["vote_answer"])) {
+    $votedAnswerId = $_POST['answer_id'];
+    $userID = $_POST['user_id'];
+    $voteType = $_POST['vote_type'];
+
+    // Check if the answer exists before adding a vote
+    $voted_answer = $answerService->getById($votedAnswerId);
+    if ($voted_answer) {
+        // Answer exists, proceed with adding the vote
+        $vote = new Vote($logged_in_user->getUserId(), 0, $votedAnswerId, $voteType);
+
+        $reputation = $voted_answer->getReputations();
+
+        if ($voteService->add_vote($vote, "answer")) {
+            if ($voteType == "upvote") {
+                $reputation += 1;
+            } else {
+                $reputation -= 1;
+            }
+        } else {
+            if ($voteType == "upvote") {
+                $reputation += 2;
+            } else {
+                $reputation -= 2;
+            }
+        }
+
+        $voted_answer->setReputations($reputation);
+
+        $answerService->update($votedAnswerId, $voted_answer);
+
+        header("Refresh:0");
+        exit;
+    } else {
+        // Answer does not exist, handle this case (e.g., show an error message)
+        echo "Error: The answer does not exist.";
+    }
+}
+
+
+
 // Handle answer submission
 if (isset($_POST['submit_answer'])) {
     $answerText = $_POST['answer'];
     $questionID = $_POST['question_id'];
-    
+
     $currentDateTime = date("Y-m-d H:i:s");
     // Create an Answer object
-    $answer = new Answer($logged_in_user->getUserId(), $questionID, $answerText, $currentDateTime, null, null);
-    
+    $voted_answer = new Answer($logged_in_user->getUserId(), $questionID, $answerText, $currentDateTime, null, null);
+
     // Use the AnswerService to save the answer
     $answerService = new AnswerService();
-    $answerService->create($answer);
-    
+    $answerService->add_vote($voted_answer);
+
     // Redirect the user back to the same page or display a success message
     header("Location: question_details.php?id=" . $questionID);
     exit();
@@ -125,8 +166,10 @@ if (isset($_POST['submit_answer'])) {
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
                             <button type="submit" class="btn btn-success d-flex p-2" name="vote_type" value="upvote" style="width: 50px; margin-left: 15px;"><span>⬆</span> <span> <?php echo $voteService->getUpvotesCount($question->getQuestionId()) ?></span>  </button>
+                            <input type="hidden" name="vote_question" value="true">
                         </form>
                         <form method="post">
+                            <input type="hidden" name="vote_question" value="true">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
                             <button type="submit" class="btn btn-danger d-flex p-2" name="vote_type" value="downvote" style="width: 50px; margin-left: 15px;"> <span>⬇</span> <span><?php echo $voteService->getDownvotesCount($question->getQuestionId()) ?></span> </button>
@@ -152,22 +195,28 @@ if (isset($_POST['submit_answer'])) {
             </form>
 
         <h2>Answers</h2>
-        <?php foreach ($answers as $answer): ?>
+        <?php foreach ($answers as $ans): ?>
             <div class="card mb-3">
                 <div class="card-body">
-                    <p class="card-text"><?php echo $answer->getBody(); ?></p>
-                    <p class="card-text"><small class="text-muted">Posted by <?php echo $userService->getById($answer->getUserID())->getUsername(); ?> | Created at <?php echo $answer->getCreatedAt(); ?></small></p>
+                    <p class="card-text"><?php echo $ans->getBody(); ?></p>
+                    <p class="card-text"><small class="text-muted">Posted by <?php echo $userService->getById($ans->getUserID())->getUsername(); ?> | Created at <?php echo $ans->getCreatedAt(); ?></small></p>
                 </div>
                 <div class="btn-group mb-2" role="group" aria-label="Vote Answer">
                         <form method="post">
-                            <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
+                            <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-sm btn-success d-flex p-2" name="vote_type" value="upvote" style="width: 50px; margin-left: 15px;"> <span>⬆</span> <span>0</span></button>
+                            <input type="hidden" name="vote_answer" value="true">
+                            <button type="submit" class="btn btn-sm btn-success d-flex p-2" name="vote_type" value="upvote" style="width: 50px; margin-left: 15px;"> <span>⬆</span> <span>
+                                    <?php echo $voteService->getUpvotesCountForAnswers($ans->getAnswerId()); ?>
+                                </span></button>
                         </form>
                         <form method="post">
-                            <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
+                            <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-sm btn-danger d-flex p-2" name="vote_type" value="downvote" style="width: 50px; margin-left: 15px;"><span>⬇</span> <span>0</span></button>
+                            <input type="hidden" name="vote_answer" value="true">
+                            <button type="submit" class="btn btn-sm btn-danger d-flex p-2" name="vote_type" value="downvote" style="width: 50px; margin-left: 15px;"><span>⬇</span> <span>
+                                    <?php echo $voteService->getDownvotesCountForAnswers($ans->getAnswerId()); ?>
+                                </span></button>
                         </form>
                     </div>
             </div>

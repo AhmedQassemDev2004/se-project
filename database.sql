@@ -30,16 +30,18 @@ CREATE TABLE Answers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reputations INT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (question_id) REFERENCES Questions(question_id)
+    FOREIGN KEY (question_id) REFERENCES Questions(question_id),
 );
 
 CREATE TABLE Votes (
                        vote_id INT PRIMARY KEY AUTO_INCREMENT,
                        user_id INT,
                        question_id INT,
+                        answer_id INT,
                        type ENUM('upvote', 'downvote') NOT NULL,
                        FOREIGN KEY (user_id) REFERENCES Users(user_id),
-                        FOREIGN KEY (question_id) REFERENCES Questions(question_id),
+                       FOREIGN KEY (question_id) REFERENCES Questions(question_id),
+                       FOREIGN KEY (answer_id) REFERENCES Answers(answer_id)
 );
 
 CREATE TABLE Tags (

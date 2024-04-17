@@ -16,7 +16,7 @@ class AnswerService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function create(object $data)
+    public function add_vote(object $data)
     {
         $query = "INSERT INTO Answers (user_id, question_id, body, created_at, reputations) VALUES (:user_id, :question_id, :body, :created_at, :reputations)";
         $stmt = $this->db->prepare($query);
@@ -36,7 +36,14 @@ class AnswerService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['answer_id' => $id]);
         $answerData = $stmt->fetch(PDO::FETCH_ASSOC);
-        return new Answer($answerData['answer_id'], $answerData['user_id'], $answerData['question_id'], $answerData['body'], $answerData['created_at'], $answerData['reputations']);
+        return new Answer(
+            $answerData['user_id'],
+            $answerData['question_id'],
+            $answerData['body'],
+            $answerData['created_at'],
+            $answerData['answer_id'],
+            $answerData['reputations']
+        );
     }
 
     public function getAll()
@@ -46,7 +53,14 @@ class AnswerService implements Service
         $answerDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $answers = [];
         foreach ($answerDataArray as $answerData) {
-            $answers[] = new Answer($answerData['answer_id'], $answerData['user_id'], $answerData['question_id'], $answerData['body'], $answerData['created_at'], $answerData['reputations']);
+            $answers[] = new Answer(
+                $answerData['user_id'],
+                $answerData['question_id'],
+                $answerData['body'],
+                $answerData['created_at'],
+                $answerData['answer_id'],
+                $answerData['reputations']
+            );
         }
         return $answers;
     }
@@ -71,7 +85,9 @@ class AnswerService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['answer_id' => $id]);
     }
-    public function getAnswersByQuestionID($questionID) {
+
+    public function getAnswersByQuestionID($questionID)
+    {
         $query = "SELECT * FROM Answers WHERE question_id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$questionID]); // Use array parameter binding for PDO
@@ -79,8 +95,14 @@ class AnswerService implements Service
 
         $answers = [];
         foreach ($answersDataArray as $answerInfo) {
-            $answers[] = new Answer($answerInfo['user_id'], $answerInfo['question_id'],
-                                    $answerInfo['body'], $answerInfo['created_at'], $answerInfo['answer_id'], $answerInfo['reputations']);
+            $answers[] = new Answer(
+                $answerInfo['user_id'],
+                $answerInfo['question_id'],
+                $answerInfo['body'],
+                $answerInfo['created_at'],
+                $answerInfo['answer_id'],
+                $answerInfo['reputations']
+            );
         }
         return $answers;
     }
