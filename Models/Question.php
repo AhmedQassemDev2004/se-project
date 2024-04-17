@@ -20,4 +20,54 @@ class Question {
         $this->updated_at = $updated_at;
         $this->reputations = $reputations;
     }
+
+    // Getters
+    public function getQuestionId(): int {
+        return $this->question_id;
+    }
+
+    public function getUserId(): int {
+        return $this->user_id;
+    }
+
+    public function getTitle(): string {
+        return $this->title;
+    }
+
+    public function getBody(): string {
+        return $this->body;
+    }
+
+    public function getCreatedAt(): string {
+        return $this->created_at;
+    }
+
+    public function getUpdatedAt(): string {
+        return $this->updated_at;
+    }
+
+    public function getReputations(): int {
+        return $this->reputations;
+    }
+
+    // Setters
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function setBody(string $body): void {
+        $this->body = $body;
+    }
+
+    public function setCreatedAt(string $created_at): void {
+        $this->created_at = $created_at;
+    }
+
+    public function setUpdatedAt(string $updated_at): void {
+        $this->updated_at = $updated_at;
+    }
+
+    public function setReputations(int $reputations): void {
+        $this->reputations = $reputations;
+    }
 }

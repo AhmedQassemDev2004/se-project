@@ -69,10 +69,43 @@ class QuestionService implements Service
 
     public function delete(int $id)
     {
+        // Delete related answers
+        $query = "DELETE FROM Answers WHERE question_id = :question_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['question_id' => $id]);
+    
+        // Delete related question tags
+        $query = "DELETE FROM Question_Tags WHERE question_id = :question_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['question_id' => $id]);
+
+        // Delete related question votes
+        $query = "DELETE FROM Votes WHERE question_id = :question_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['question_id' => $id]);
+    
+        // Delete the question itself
         $query = "DELETE FROM Questions WHERE question_id = :question_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['question_id' => $id]);
     }
-}
+    
 
+    public function getQuestionsByTagID($tagID) 
+    {
+        // Prepare and execute SQL query to retrieve questions by tag ID
+        $query = "SELECT * FROM Questions INNER JOIN Question_Tags ON Questions.question_id = Question_Tags.question_id WHERE Question_Tags.tag_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$tagID]); // Use array parameter binding for PDO
+        $questionDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $questions = [];
+        foreach ($questionDataArray as $questionInfo) {
+            $questions[] = new Question($questionInfo['question_id'], $questionInfo['user_id'], $questionInfo['title'],
+                                        $questionInfo['body'], $questionInfo['created_at'], $questionInfo['updated_at'],
+                                        $questionInfo['reputations']);
+        }
+        return $questions;
+    }
+}
 ?>

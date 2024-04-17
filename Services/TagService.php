@@ -58,4 +58,20 @@ class TagService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tag_id' => $id]);
     }
+
+    public function getTagsByQuestionID($questionID) {
+        $query = "SELECT Tags.tag_id, Tags.name FROM Tags 
+                  INNER JOIN Question_Tags ON Tags.tag_id = Question_Tags.tag_id 
+                  WHERE Question_Tags.question_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$questionID]); // Use array parameter binding for PDO
+        $tagDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $tags = [];
+        foreach ($tagDataArray as $tagInfo) {
+            $tags[] = new Tag($tagInfo['tag_id'], $tagInfo['name']);
+        }
+        return $tags;
+    }
+    
 }
