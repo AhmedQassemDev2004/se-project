@@ -9,7 +9,7 @@ class User {
     public string $password;
     public ?string $photo;
     public string $created_at;
-    public int $reputations;
+    public int $reputations; 
     public string $role;
 
     public function __construct(int $user_id, string $username, string $email, string $password, ?string $photo, string $created_at, int $reputations, string $role) {
