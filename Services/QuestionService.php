@@ -16,7 +16,7 @@ class QuestionService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function add_vote(object $data)
+    public function create(object $data)
     {
         $query = "INSERT INTO Questions (user_id, title, body, created_at, updated_at, reputations) VALUES (:user_id, :title, :body, :created_at, :updated_at, :reputations)";
         $stmt = $this->db->prepare($query);

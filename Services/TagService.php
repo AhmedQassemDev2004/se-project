@@ -16,7 +16,7 @@ class TagService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function add_vote(object $data)
+    public function create(object $data)
     {
         $query = "INSERT INTO Tags (name) VALUES (:name)";
         $stmt = $this->db->prepare($query);

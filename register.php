@@ -18,8 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if($userService->getUserByEmail($email)) {
         $error = "Email already exists.";
     } else {
-        $user = new User(0, $username, $email, password_hash($password, PASSWORD_DEFAULT), null, date("Y-m-d H:i:s"), 0, 'user');
-        $userId = $userService->add_vote($user);
+        $user = new User(0, $username, $email, $password, null, date("Y-m-d H:i:s"), 0, 'user');
+        $userId = $userService->create($user);
         if ($userId) {
             (new \App\Services\AuthService())->auth($username);
             header("Location: ".$domain);
@@ -39,9 +39,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="card-body">
                     <?php if (isset($error)) : ?>
-                        <div class="alert alert-danger" role="alert">
-                            <?php echo $error; ?>
-                        </div>
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo $error; ?>
+                    </div>
                     <?php endif; ?>
 
                     <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
@@ -69,4 +69,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 </div>
-
