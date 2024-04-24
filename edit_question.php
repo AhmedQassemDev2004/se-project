@@ -43,18 +43,19 @@ if (isset($_POST['edit_question'])) {
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-        <form method="post">
-            <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input type="text" class="form-control" id="title" name="title" value="<?php echo $question->getTitle(); ?>">
-            </div>
-            <div class="form-group">
-                <label for="body">Body:</label>
-                <textarea class="form-control" id="body" name="body"><?php echo $question->getBody(); ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" name="edit_question">Submit</button>
-        </form>
+            <form method="post">
+                <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title"
+                        value="<?php echo $question->getTitle(); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="body">Body:</label>
+                    <textarea class="form-control" id="body" name="body"><?php echo $question->getBody(); ?></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" name="edit_question">Submit</button>
+            </form>
         </div>
     </div>
 </div>

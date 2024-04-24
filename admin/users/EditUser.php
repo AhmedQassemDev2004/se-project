@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $user) {
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Update</button>
-            <a href="ViewUsers.php" class="btn btn-danger">Go Back</a>
+            <a href="index.php" class="btn btn-danger">Go Back</a>
         </form>
         <?php endif; ?>
     </div>

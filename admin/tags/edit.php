@@ -1,8 +1,10 @@
 <?php
-require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/partials/header.php";
+require_once __DIR__."/../../vendor/autoload.php";
+require_once __DIR__."/../../partials/header.php";
 
 use App\Services\TagService;
+
+$tagService = new TagService();
 
 // Check if the tag ID is provided in the URL
 if (!isset($_GET["tag_id"])) 
@@ -24,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $tagService->update($tag_id, (object)["name" => $name]);
 
     // Redirect back to the tags page after updating
-    header("Location: tags.php");
+    header("Location: .");
     exit();
 }
 
@@ -52,7 +54,8 @@ if (!$tag) {
                     <form method="POST">
                         <div class="form-group">
                             <label for="name">Name:</label>
-                            <input type="text" class="form-control" id="name" name="name" value="<?php echo $tag->getName(); ?>" required>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="<?php echo $tag->getName(); ?>" required>
                         </div>
                         <input type="hidden" name="tag_id" value="<?php echo $tag->getTagId(); ?>">
                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -62,4 +65,3 @@ if (!$tag) {
         </div>
     </div>
 </div>
-

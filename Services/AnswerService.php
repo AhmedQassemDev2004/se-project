@@ -16,6 +16,9 @@ class AnswerService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
+    public function create(object $data){
+        return null;
+    }
     public function add_vote(object $data)
     {
         $query = "INSERT INTO Answers (user_id, question_id, body, created_at, reputations) VALUES (:user_id, :question_id, :body, :created_at, :reputations)";

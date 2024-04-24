@@ -76,7 +76,7 @@ if (isset($_GET['id'])) {
             <?php echo $message; ?>
         </div>
         <?php endif; ?>
-        <a href="ViewUsers.php" class="btn btn-danger">Back to Users</a>
+        <a href="index.php" class="btn btn-danger">Back to Users</a>
     </div>
 </body>
 
