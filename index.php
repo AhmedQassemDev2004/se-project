@@ -6,6 +6,7 @@ require_once __DIR__."/partials/header.php";
 use App\Services\QuestionService;
 use App\Services\TagService;
 use App\Services\UserService;
+use App\Services\AuthService;
 
 $questionService = new QuestionService();
 $questions = $questionService->getAll();
@@ -14,6 +15,10 @@ $tagService = new TagService();
 $tags = $tagService->getAll();
 
 $userService = new UserService();
+$authService = new AuthService();
+
+// Check if the user is logged in
+$userLoggedIn = $authService->isLoggedIn();
 
 // Retrieve selected tag from URL parameter
 $selected_tag_id = isset($_GET['tag']) ? $_GET['tag'] : null;
@@ -30,6 +35,16 @@ if ($selected_tag_id) {
 <div class="container mt-3">
     <div class="row justify-content-center">
         <div class="col-md-8">
+        
+            <?php if ($userLoggedIn): ?>
+                <div class="text-center mt-3">
+                    <a href="AskQuestion.php" class="btn btn-primary">Ask Question</a>
+                </div>
+            <?php else: ?>
+                <div class="text-center mt-3">
+                    <button onclick="askQuestion()" class="btn btn-primary">Ask Question</button>
+                </div>
+            <?php endif; ?>
 
             <h1 class="mb-4">View Questions</h1>
             <!-- Display tag filter options -->
@@ -67,3 +82,9 @@ if ($selected_tag_id) {
         </div>
     </div>
 </div>
+
+<script>
+    function askQuestion() {
+        alert("You have to be logged in to ask a question.");
+    }
+</script>

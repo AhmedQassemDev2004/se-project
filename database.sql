@@ -30,7 +30,7 @@ CREATE TABLE Answers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reputations INT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (question_id) REFERENCES Questions(question_id),
+    FOREIGN KEY (question_id) REFERENCES Questions(question_id)
 );
 
 CREATE TABLE Votes (

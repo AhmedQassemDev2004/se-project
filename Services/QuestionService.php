@@ -107,5 +107,13 @@ class QuestionService implements Service
         }
         return $questions;
     }
+    
+    public function add_tag_to_question(int $questionId, int $tagId)
+    {
+        $query = "INSERT INTO Question_Tags (question_id, tag_id) VALUES (:question_id, :tag_id)";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['question_id' => $questionId, 'tag_id' => $tagId]);
+    }
+
 }
 ?>
