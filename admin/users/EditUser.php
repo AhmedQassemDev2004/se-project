@@ -1,7 +1,7 @@
 <?php
 // Include the necessary files
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../../Utils/config.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
+require_once __DIR__ . "/../../Utils/config.php";
 use App\Services\UserService;
 
 // Create an instance of the UserService
@@ -74,14 +74,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $user) {
     <title>Edit User</title>
     <link rel="stylesheet" href="<?php echo $domain; ?>/css/bootstrap.min.css" />
     <style>
-    body {
-        padding-top: 56px;
-        /* Adjust based on your navbar height */
-    }
+        body {
+            padding-top: 56px;
+            /* Adjust based on your navbar height */
+        }
 
-    .container {
-        margin-top: 20px;
-    }
+        .container {
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -94,32 +94,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $user) {
         </nav>
 
         <?php if (!empty($message)): ?>
-        <div class="alert alert-primary" role="alert">
-            <?php echo $message; ?>
-        </div>
+            <div class="alert alert-primary" role="alert">
+                <?php echo $message; ?>
+            </div>
         <?php endif; ?>
         <?php if ($user): ?>
-        <form action="EditUser.php?id=<?php echo $user->user_id; ?>" method="POST">
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username"
-                    value="<?php echo $user->username; ?>" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" value="<?php echo $user->email; ?>"
-                    required>
-            </div>
-            <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <select class="form-select" id="role" name="role" required>
-                    <option value="admin" <?php echo ($user->role === 'admin') ? 'selected' : ''; ?>>Admin</option>
-                    <option value="user" <?php echo ($user->role === 'user') ? 'selected' : ''; ?>>User</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-            <a href="index.php" class="btn btn-danger">Go Back</a>
-        </form>
+            <form action="EditUser.php?id=<?php echo $user->user_id; ?>" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username"
+                        value="<?php echo $user->username; ?>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $user->email; ?>"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="admin" <?php echo ($user->role === 'admin') ? 'selected' : ''; ?>>Admin</option>
+                        <option value="user" <?php echo ($user->role === 'user') ? 'selected' : ''; ?>>User</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="index.php" class="btn btn-danger">Go Back</a>
+            </form>
         <?php endif; ?>
     </div>
 </body>

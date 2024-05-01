@@ -1,11 +1,18 @@
 <?php
 
 use App\Services\AuthService;
+use App\Services\NotificationService;
 
 require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../Utils/config.php';
 
+
 $authService = new AuthService();
+$notificationService = new NotificationService();
+if ($authService->isLoggedIn()) {
+    $unReadNotifications = $notificationService->getLimit($authService->getCurrentUser()->getUserId(), 30);
+    $unReadNotificationsCount = count($unReadNotifications);
+}
 ?>
 
 <html>
@@ -13,6 +20,7 @@ $authService = new AuthService();
 <head>
     <title>Title</title>
     <link rel="stylesheet" href="<?php echo $domain; ?>/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<?php echo $domain; ?>/css/all.min.css" />
 </head>
 
 <body>
@@ -29,29 +37,46 @@ $authService = new AuthService();
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="<?php echo $domain; ?>">Home</a>
                     </li>
-                    <?php if (!$authService->isLoggedIn()) : ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $domain; ?>login.php">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $domain; ?>register.php">Register</a>
-                    </li>
+                    <?php if (!$authService->isLoggedIn()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo $domain; ?>login.php">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo $domain; ?>register.php">Register</a>
+                        </li>
                     <?php else: ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Welcome, <?php echo $authService->getCurrentUser()->username; ?>
-                        </a>
-                    </li>
-                    <?php if($authService->getCurrentUser()->getRole()=="admin"):?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $domain;?>/Admin/ViewUsers.php">Admin panel
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    <li class="nav-item">
-                        <a class="nav-link logout-btn" href="<?php echo $domain; ?>logout.php">Logout</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Welcome, <?php echo $authService->getCurrentUser()->username; ?>
+                            </a>
+                        </li>
+                        <?php if ($authService->getCurrentUser()->getRole() == "admin"): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?php echo $domain; ?>/Admin/ViewUsers.php">Admin panel
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        <li class="nav-item">
+                            <a class="nav-link logout-btn" href="<?php echo $domain; ?>logout.php">Logout</a>
+                        </li>
                     <?php endif ?>
                 </ul>
+                <div class="dropdown m-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="notificationsDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-bell"></i>
+                        <?php echo $unReadNotificationsCount; ?>
+                    </button>
+                    <?php if ($authService->isLoggedIn()): ?>
+                        <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
+                            <?php
+                            foreach ($unReadNotifications as $notification) {
+                                echo "<li><a class='dropdown-item' href='#'>{$notification->getNotificationType()} - {$notification->getCreatedAt()}</a></li>";
+                            }
+                            ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-outline-success" type="submit">Search</button>
@@ -79,16 +104,16 @@ $authService = new AuthService();
         </div>
     </div>
 
-    <script src="<?php echo $domain;?>/js/bootstrap.min.js"></script>
+    <script src="<?php echo $domain; ?>/js/bootstrap.bundle.min.js"></script>
     <script>
-    // JavaScript to handle logout confirmation
-    document.addEventListener("DOMContentLoaded", function() {
-        var logoutButton = document.querySelector('.logout-btn');
-        logoutButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            var logoutConfirmationModal = new bootstrap.Modal(document.getElementById(
-                'logoutConfirmationModal'));
-            logoutConfirmationModal.show();
+        // JavaScript to handle logout confirmation
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoutButton = document.querySelector('.logout-btn');
+            logoutButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                var logoutConfirmationModal = new bootstrap.Modal(document.getElementById(
+                    'logoutConfirmationModal'));
+                logoutConfirmationModal.show();
+            });
         });
-    });
     </script>

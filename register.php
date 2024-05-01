@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/partials/header.php";
+require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/partials/header.php";
 
 use App\Services\UserService;
 use App\Utils\Utils;
@@ -15,14 +15,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($userService->getUserByUsername($username)) {
         $error = "Username already exists. Please choose another username.";
-    } else if($userService->getUserByEmail($email)) {
+    } else if ($userService->getUserByEmail($email)) {
         $error = "Email already exists.";
     } else {
         $user = new User(0, $username, $email, $password, null, date("Y-m-d H:i:s"), 0, 'user');
         $userId = $userService->create($user);
         if ($userId) {
             (new \App\Services\AuthService())->auth($username);
-            header("Location: ".$domain);
+            header("Location: " . $domain);
             exit();
         } else {
             $error = "Registration failed. Please try again.";
@@ -38,10 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card-header">Register</div>
 
                 <div class="card-body">
-                    <?php if (isset($error)) : ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?php echo $error; ?>
-                    </div>
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?php echo $error; ?>
+                        </div>
                     <?php endif; ?>
 
                     <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">

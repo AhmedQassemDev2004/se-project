@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Answer;
+use App\Models\Notification;
 use App\Utils\DBConnection;
+use Exception;
 use PDO;
 
 class AnswerService implements Service
@@ -16,10 +18,7 @@ class AnswerService implements Service
         $this->db = $dbConnection->getConnection();
     }
 
-    public function create(object $data){
-        return null;
-    }
-    public function add_vote(object $data)
+    public function create(object $data)
     {
         $query = "INSERT INTO Answers (user_id, question_id, body, created_at, reputations) VALUES (:user_id, :question_id, :body, :created_at, :reputations)";
         $stmt = $this->db->prepare($query);
@@ -30,6 +29,27 @@ class AnswerService implements Service
             'created_at' => $data->created_at,
             'reputations' => $data->reputations
         ]);
+
+        try {
+            $targetedUserId = (new QuestionService())->getById($data->getQuestionId())->getUserId();
+            $notification = new Notification(
+                0,
+                $data->getUserId(),
+                $targetedUserId,
+                'answer',
+                $data->getQuestionId(),
+                false
+            );
+
+            $notificationService = new NotificationService();
+
+            $notificationService->create(
+                $notification
+            );
+        } catch (Exception $ex) {
+            var_dump($ex);
+        }
+
         return $this->db->lastInsertId();
     }
 

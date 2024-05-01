@@ -69,3 +69,15 @@ CREATE TABLE User_Badges (
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (badge_id) REFERENCES Badges(badge_id) ON DELETE NO ACTION
 );
+
+CREATE TABLE Notifications (
+    notification_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    targeted_user_id INT,
+    notification_type ENUM('vote_on_question', 'vote_on_answer', 'answer', 'badge_earned') NOT NULL,
+    source_id INT,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(targeted_user_id) ON DELETE CASCADE
+);

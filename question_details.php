@@ -2,8 +2,8 @@
 
 namespace App;
 
-require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/partials/header.php";
+require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/partials/header.php";
 
 use App\Models\Vote;
 use App\Models\Answer;
@@ -125,7 +125,9 @@ if (isset($_POST["vote_answer"])) {
 }
 
 
+?>
 
+<?php
 // Handle answer submission
 if (isset($_POST['submit_answer'])) {
     $answerText = $_POST['answer'];
@@ -137,13 +139,13 @@ if (isset($_POST['submit_answer'])) {
 
     // Use the AnswerService to save the answer
     $answerService = new AnswerService();
-    $answerService->add_vote($voted_answer);
+    $answerService->create($voted_answer);
 
-    // Redirect the user back to the same page or display a success message
+
+    header_remove("Location");
     header("Location: question_details.php?id=" . $questionID);
-    exit();
+    exit;
 }
-
 
 ?>
 
@@ -151,7 +153,7 @@ if (isset($_POST['submit_answer'])) {
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-        <div class="card mb-4 mt-4">
+            <div class="card mb-4 mt-4">
                 <div class="card-body">
                     <h5 class="card-title"><?php echo $question->getTitle(); ?></h5>
                     <p class="card-text"><strong>Tags:</strong>
@@ -160,25 +162,34 @@ if (isset($_POST['submit_answer'])) {
                         <?php endforeach; ?>
                     </p>
                     <p class="card-text"><?php echo $question->getBody(); ?></p>
-                    <p class="card-text"><small class="text-muted">Posted by <?php echo $userService->getById($question->getUserID())->getUsername(); ?> | Created at <?php echo $question->getCreatedAt(); ?></small></p>
+                    <p class="card-text"><small class="text-muted">Posted by
+                            <?php echo $userService->getById($question->getUserID())->getUsername(); ?> | Created at
+                            <?php echo $question->getCreatedAt(); ?></small></p>
                     <div class="btn-group mb-2" role="group" aria-label="Vote Question">
                         <form method="post">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-success d-flex p-2" name="vote_type" value="upvote" style="width: 50px; margin-left: 15px;"><span>⬆</span> <span> <?php echo $voteService->getUpvotesCount($question->getQuestionId()) ?></span>  </button>
+                            <button type="submit" class="btn btn-success d-flex p-2" name="vote_type" value="upvote"
+                                style="width: 50px; margin-left: 15px;"><span>⬆</span> <span>
+                                    <?php echo $voteService->getUpvotesCount($question->getQuestionId()) ?></span>
+                            </button>
                             <input type="hidden" name="vote_question" value="true">
                         </form>
                         <form method="post">
                             <input type="hidden" name="vote_question" value="true">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-danger d-flex p-2" name="vote_type" value="downvote" style="width: 50px; margin-left: 15px;"> <span>⬇</span> <span><?php echo $voteService->getDownvotesCount($question->getQuestionId()) ?></span> </button>
+                            <button type="submit" class="btn btn-danger d-flex p-2" name="vote_type" value="downvote"
+                                style="width: 50px; margin-left: 15px;"> <span>⬇</span>
+                                <span><?php echo $voteService->getDownvotesCount($question->getQuestionId()) ?></span>
+                            </button>
                         </form>
                     </div>
                     <?php if ($question->getUserID() == $logged_in_user->getUserId()): ?>
                         <form method="post">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-                            <a href="edit_question.php?id=<?php echo $question->getQuestionID(); ?>" class="btn btn-primary w-25">Edit</a>
+                            <a href="edit_question.php?id=<?php echo $question->getQuestionID(); ?>"
+                                class="btn btn-primary w-25">Edit</a>
                             <button type="submit" class="btn btn-danger w-25" name="delete_question">Delete</button>
                         </form>
                     <?php endif; ?>
@@ -194,19 +205,22 @@ if (isset($_POST['submit_answer'])) {
                 <button type="submit" class="btn btn-primary mt-2" name="submit_answer">Submit Answer</button>
             </form>
 
-        <h2>Answers</h2>
-        <?php foreach ($answers as $ans): ?>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <p class="card-text"><?php echo $ans->getBody(); ?></p>
-                    <p class="card-text"><small class="text-muted">Posted by <?php echo $userService->getById($ans->getUserID())->getUsername(); ?> | Created at <?php echo $ans->getCreatedAt(); ?></small></p>
-                </div>
-                <div class="btn-group mb-2" role="group" aria-label="Vote Answer">
+            <h2>Answers</h2>
+            <?php foreach ($answers as $ans): ?>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="card-text"><?php echo $ans->getBody(); ?></p>
+                        <p class="card-text"><small class="text-muted">Posted by
+                                <?php echo $userService->getById($ans->getUserID())->getUsername(); ?> | Created at
+                                <?php echo $ans->getCreatedAt(); ?></small></p>
+                    </div>
+                    <div class="btn-group mb-2" role="group" aria-label="Vote Answer">
                         <form method="post">
                             <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
                             <input type="hidden" name="vote_answer" value="true">
-                            <button type="submit" class="btn btn-sm btn-success d-flex p-2" name="vote_type" value="upvote" style="width: 50px; margin-left: 15px;"> <span>⬆</span> <span>
+                            <button type="submit" class="btn btn-sm btn-success d-flex p-2" name="vote_type" value="upvote"
+                                style="width: 50px; margin-left: 15px;"> <span>⬆</span> <span>
                                     <?php echo $voteService->getUpvotesCountForAnswers($ans->getAnswerId()); ?>
                                 </span></button>
                         </form>
@@ -214,13 +228,18 @@ if (isset($_POST['submit_answer'])) {
                             <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
                             <input type="hidden" name="vote_answer" value="true">
-                            <button type="submit" class="btn btn-sm btn-danger d-flex p-2" name="vote_type" value="downvote" style="width: 50px; margin-left: 15px;"><span>⬇</span> <span>
+                            <button type="submit" class="btn btn-sm btn-danger d-flex p-2" name="vote_type" value="downvote"
+                                style="width: 50px; margin-left: 15px;"><span>⬇</span> <span>
                                     <?php echo $voteService->getDownvotesCountForAnswers($ans->getAnswerId()); ?>
                                 </span></button>
                         </form>
                     </div>
-            </div>
-        <?php endforeach; ?>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
+
+<?php
+require_once __DIR__ . "/partials/footer.php";
+?>

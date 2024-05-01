@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Answer;
+use App\Models\Notification;
 use App\Models\Vote;
 use App\Utils\DBConnection;
 use PDO;
@@ -10,69 +10,100 @@ use PDO;
 class VotingService implements Service
 {
     private $db;
+    private $notificationService;
 
     public function __construct()
     {
         $dbConnection = new DBConnection();
         $this->db = $dbConnection->getConnection();
+        $this->notificationService = new NotificationService();
     }
 
-    public function create(object $data) {
+    public function create(object $data)
+    {
 
     }
 
     public function add_vote(object $data, string $for = "question")
     {
-        if($for == "question") {
-            // Check if the user has already voted on this question
-            $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['question_id' => $data->getQuestionId(), 'user_id' => $data->getUserId()]);
-            $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            if ($for == "question") {
+                // Check if the user has already voted on this question
+                $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['question_id' => $data->getQuestionId(), 'user_id' => $data->getUserId()]);
+                $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($voteData) {
-                // Update the existing vote
-                $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
-                return false;
-            } else {
-                // Insert a new vote
-                $query = "INSERT INTO Votes (user_id, question_id, type) VALUES (:user_id, :question_id, :type)";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([
-                    'user_id' => $data->getUserId(),
-                    'question_id' => $data->getQuestionId(),
-                    'type' => $data->getVoteType()
-                ]);
-                return true;
-            }
-        } else {
-            // Check if the user has already voted on this question
-            $query = "SELECT * FROM Votes WHERE answer_id = :answer_id AND user_id = :user_id";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['answer_id' => $data->getAnswerId(), 'user_id' => $data->getUserId()]);
-            $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($voteData) {
+                    // Update the existing vote
+                    $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
+                    return false;
+                } else {
+                    // Insert a new vote
+                    $query = "INSERT INTO Votes (user_id, question_id, type) VALUES (:user_id, :question_id, :type)";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->execute([
+                        'user_id' => $data->getUserId(),
+                        'question_id' => $data->getQuestionId(),
+                        'type' => $data->getVoteType()
+                    ]);
 
-            if ($voteData) {
-                // Update the existing vote
-                $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
-                return false;
+                    // Add notification
+                    $notificationData = new Notification(
+                        0,
+                        $data->getUserId(),
+                        'vote_on_question',
+                        $data->getQuestionId(),
+                        false
+                    );
+
+                    $this->notificationService->create($notificationData);
+
+                    return true;
+                }
             } else {
-                // Insert a new vote
-                $query = "INSERT INTO Votes (user_id, answer_id, type) VALUES (:user_id, :answer_id, :type)";
+                // Check if the user has already voted on this answer
+                $query = "SELECT * FROM Votes WHERE answer_id = :answer_id AND user_id = :user_id";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute([
-                    'user_id' => $data->getUserId(),
-                    'answer_id' => $data->getAnswerId(),
-                    'type' => $data->getVoteType()
-                ]);
-                return true;
+                $stmt->execute(['answer_id' => $data->getAnswerId(), 'user_id' => $data->getUserId()]);
+                $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($voteData) {
+                    // Update the existing vote
+                    $query = "UPDATE Votes SET type = :type WHERE vote_id = :vote_id";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->execute(['type' => $data->getVoteType(), 'vote_id' => $voteData['vote_id']]);
+                    return false;
+                } else {
+                    // Insert a new vote
+                    $query = "INSERT INTO Votes (user_id, answer_id, type) VALUES (:user_id, :answer_id, :type)";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->execute([
+                        'user_id' => $data->getUserId(),
+                        'answer_id' => $data->getAnswerId(),
+                        'type' => $data->getVoteType()
+                    ]);
+
+                    $notificationData = new Notification(
+                        0,
+                        $data->getUserId(),
+                        'vote_on_answer',
+                        $data->getAnswerId(),
+                        false,
+                    );
+
+                    $this->notificationService->create($notificationData);
+
+                    return true;
+                }
             }
+        } catch (\Exception $ex) {
+            var_dump($ex);
         }
     }
+
 
     public function getById(int $id)
     {
