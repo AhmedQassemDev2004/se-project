@@ -70,11 +70,10 @@ if (isset($_GET['search'])) {
                     <li class="nav-item">
                         <a class="nav-link" href="AddUser.php">Add User</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="GenerateReport.php">Generate Report</a>
+                    </li>
                 </ul>
-                <form class="d-flex" role="search" action="ViewUsers.php" method="GET">
-                    <input class="form-control me-2" type="search" placeholder="Search by user ID or username" aria-label="Search" name="search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
         </div>
     </nav>
@@ -101,17 +100,17 @@ if (isset($_GET['search'])) {
                 // Fetch users from the database and display them in the table
                 if ($users) {
                     foreach ($users as $user) {
-                            echo "<tr>";
-                            echo "<td>" . $user->user_id . "</td>";
-                            echo "<td>" . $user->username . "</td>";
-                            echo "<td>" . $user->email . "</td>";
-                            echo "<td>" . $user->role . "</td>";
-                            echo "<td>";
-                            echo "<a href='EditUser.php?id=" . $user->user_id . "' class='btn btn-primary btn-sm'>Edit</a>";
-                            echo "&nbsp;";
-                            echo "<a href='DeleteUser.php?id=" . $user->user_id . "' class='btn btn-danger btn-sm'>Delete</a>";
-                            echo "</td>";
-                            echo "</tr>";
+                        echo "<tr>";
+                        echo "<td>" . $user->user_id . "</td>";
+                        echo "<td>" . $user->username . "</td>";
+                        echo "<td>" . $user->email . "</td>";
+                        echo "<td>" . $user->role . "</td>";
+                        echo "<td>";
+                        echo "<a href='EditUser.php?id=" . $user->user_id . "' class='btn btn-primary btn-sm'>Edit</a>";
+                        echo "&nbsp;";
+                        echo "<a href='DeleteUser.php?id=" . $user->user_id . "' class='btn btn-danger btn-sm'>Delete</a>";
+                        echo "</td>";
+                        echo "</tr>";
                     }
                 } else {
                         // Handle the case where $user is null (if needed)

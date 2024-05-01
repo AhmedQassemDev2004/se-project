@@ -83,15 +83,18 @@ class UserService implements Service
                     $userData['reputations'],
                     $userData['role']
                 );
+            } else {
+                // If no user is found with the provided username, return null
+                return null;
             }
-    
-            return null;
         } catch (\PDOException $e) {
             // Handle PDOException
             // Log the error or throw a custom exception
             throw new \Exception("Error fetching user by username: " . $e->getMessage());
         }
     }
+    
+    
     
 
     public function getAll(): array
@@ -172,4 +175,52 @@ class UserService implements Service
         }
         return null;
     }
+
+    public function getUsersJoinedStatistics(): array {
+        // Get count of users joined in the last day, week, and month
+        $query = "SELECT COUNT(*) AS count FROM Users WHERE created_at >= CURDATE() - INTERVAL 1 DAY";
+        $usersJoinedLastDay = $this->db->query($query)->fetch(PDO::FETCH_ASSOC)['count'];
+    
+        $query = "SELECT COUNT(*) AS count FROM Users WHERE created_at >= CURDATE() - INTERVAL 1 WEEK";
+        $usersJoinedLastWeek = $this->db->query($query)->fetch(PDO::FETCH_ASSOC)['count'];
+    
+        $query = "SELECT COUNT(*) AS count FROM Users WHERE created_at >= CURDATE() - INTERVAL 1 MONTH";
+        $usersJoinedLastMonth = $this->db->query($query)->fetch(PDO::FETCH_ASSOC)['count'];
+    
+        return [
+            'last_day' => $usersJoinedLastDay,
+            'last_week' => $usersJoinedLastWeek,
+            'last_month' => $usersJoinedLastMonth
+        ];
+    }
+
+    public function getUsersWithMostBadges(): array
+    {
+        try {
+            $query = "SELECT u.username, COUNT(ub.badge_id) as badge_count 
+                      FROM Users u
+                      INNER JOIN User_Badges ub ON u.user_id = ub.user_id
+                      GROUP BY u.user_id 
+                      ORDER BY badge_count DESC 
+                      LIMIT 5";
+            $statement = $this->db->query($query);
+            $users = $statement->fetchAll(PDO::FETCH_ASSOC);
+    
+            return $users;
+        } catch (\PDOException $e) {
+            // Handle PDOException
+            throw new \Exception("Error fetching users with most badges: " . $e->getMessage());
+        }
+    }
+    
+
+    public function getUsersWithHighestReputations(int $limit = 10): array {
+        // Get list of users with highest reputations
+        $query = "SELECT * FROM Users ORDER BY reputations DESC LIMIT :limit";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+

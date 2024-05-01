@@ -58,11 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // If form fields are empty, display an error message
         $message = 'Please fill out all fields';
     }
-
-    if($username === $_POST['username'] && $email === $_POST['email'] && $role === $_POST['role']){
-        $message = "No changes happened";
-    }
-
 }
 ?>
 
@@ -123,3 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </body>
 
 </html>
+
+
+Draw me a sequence diagram for a use case called View users which displays all the users in the database when the admin logs in and click on the View users button 
