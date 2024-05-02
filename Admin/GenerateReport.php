@@ -43,18 +43,6 @@ $pdf->AddPage();
 // Set font
 $pdf->SetFont('helvetica', '', 12);
 
-// Header content
-$header = '<table width="100%">
-    <tr>
-        <td align="left">Report Header</td>
-        <td align="right">Date: ' . date('Y-m-d H:i:s') . '</td>
-    </tr>
-</table>';
-
-// Set header content
-$pdf->setPrintHeader(true);
-$pdf->SetHeaderData('', 0, 'Report', $header);
-
 // Footer content
 $footer = '<table width="100%">
     <tr>

@@ -118,6 +118,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </body>
 
 </html>
-
-
-Draw me a sequence diagram for a use case called View users which displays all the users in the database when the admin logs in and click on the View users button 
