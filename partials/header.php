@@ -51,7 +51,7 @@ if ($authService->isLoggedIn()) {
                         </li>
                         <?php if ($authService->getCurrentUser()->getRole() == "admin"): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?php echo $domain; ?>/Admin/ViewUsers.php">Admin panel
+                                <a class="nav-link" href="<?php echo $domain; ?>/admin/index.php">Admin panel
                                 </a>
                             </li>
                         <?php endif; ?>
