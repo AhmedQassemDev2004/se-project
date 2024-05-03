@@ -126,4 +126,16 @@ class NotificationService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['notification_id' => $id]);
     }
+
+    public function markAllAsRead(int $userId)
+    {
+        try {
+            $query = "UPDATE Notifications SET is_read = 1 WHERE targeted_user_id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['user_id' => $userId]);
+        } catch (\Exception $ex) {
+            var_dump($ex);
+        }
+    }
+
 }

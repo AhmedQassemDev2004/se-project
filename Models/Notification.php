@@ -98,9 +98,9 @@ class Notification
 
     public function displayMessage(): string
     {
-        // $actorUsername = (new UserService())->getById($this->user_id)->getUsername();
+        $actorUsername = (new UserService())->getById($this->user_id)->getUsername();
 
-        $actorUsername = "s";
+        // $actorUsername = "s";
         switch ($this->notification_type) {
             case 'vote_on_question':
                 return "Your question received a vote from $actorUsername on " . $this->getCreatedAt();

@@ -6,13 +6,13 @@ use App\Services\NotificationService;
 require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../Utils/config.php';
 
-
 $authService = new AuthService();
 $notificationService = new NotificationService();
 if ($authService->isLoggedIn()) {
     $unReadNotifications = $notificationService->getLimit($authService->getCurrentUser()->getUserId(), 30);
     $unReadNotificationsCount = count($unReadNotifications);
 }
+
 ?>
 
 <html>
@@ -69,17 +69,23 @@ if ($authService->isLoggedIn()) {
                     <?php if ($authService->isLoggedIn()): ?>
                         <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
                             <?php
-                            foreach ($unReadNotifications as $notification) {
-                                echo "<li><a class='dropdown-item' href='#'>{$notification->getNotificationType()} - {$notification->getCreatedAt()}</a></li>";
+                            if (empty($unReadNotifications)) {
+                                echo "<li>0 notifcations</li>";
+                            } else {
+                                foreach ($unReadNotifications as $notification) {
+                                    echo "<li><a class='dropdown-item' href='" . $domain . "questions_details.php?id=" . $notification->getSourceId() . "'>" . $notification->displayMessage() . "</a></li>";
+                                }
                             }
                             ?>
                         </ul>
                     <?php endif; ?>
                 </div>
 
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
+                <form class="d-flex" role="search" action="<?php echo $domain; ?>/Search.php" method="GET"
+                    id="search-form">
+                    <input id="search-input" name="q" class="form-control me-2" type="search" placeholder="Search"
+                        aria-label="Search">
+                    <button class="btn btn-outline-success" id="search-btn" type="submit">Search</button>
                 </form>
             </div>
         </div>
@@ -106,14 +112,22 @@ if ($authService->isLoggedIn()) {
 
     <script src="<?php echo $domain; ?>/js/bootstrap.bundle.min.js"></script>
     <script>
-        // JavaScript to handle logout confirmation
         document.addEventListener("DOMContentLoaded", function () {
-            var logoutButton = document.querySelector('.logout-btn');
-            logoutButton.addEventListener('click', function (event) {
+            var notificationsDropdown = document.getElementById('notificationsDropdown');
+            notificationsDropdown.addEventListener('click', function (event) {
                 event.preventDefault();
-                var logoutConfirmationModal = new bootstrap.Modal(document.getElementById(
-                    'logoutConfirmationModal'));
-                logoutConfirmationModal.show();
+                // Make an AJAX call to mark all notifications as read
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '<?php echo $domain; ?>mark_all_notifications_read.php', true);
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log("Success");
+                    } else {
+                        console.error('Failed to mark notifications as read');
+                    }
+                };
+                xhr.send();
             });
         });
     </script>

@@ -18,10 +18,20 @@ class TagService implements Service
 
     public function create(object $data)
     {
-        $query = "INSERT INTO Tags (name) VALUES (:name)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['name' => $data->name]);
-        return $this->db->lastInsertId();
+        $tagName = $data->name;
+        // Check if the tag already exists
+        $existingTag = $this->getTagByName($tagName);
+
+        if ($existingTag) {
+            // Tag already exists, return its ID
+            return $existingTag->tag_id;
+        } else {
+            // Tag does not exist, insert it into the database
+            $query = "INSERT INTO Tags (name) VALUES (:name)";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['name' => $tagName]);
+            return $this->db->lastInsertId();
+        }
     }
 
     public function getById(int $id)
@@ -59,19 +69,44 @@ class TagService implements Service
         $stmt->execute(['tag_id' => $id]);
     }
 
-    public function getTagsByQuestionID($questionID) {
+    public function getTagsByQuestionID($questionID)
+    {
         $query = "SELECT Tags.tag_id, Tags.name FROM Tags 
                   INNER JOIN Question_Tags ON Tags.tag_id = Question_Tags.tag_id 
                   WHERE Question_Tags.question_id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$questionID]); // Use array parameter binding for PDO
         $tagDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $tags = [];
         foreach ($tagDataArray as $tagInfo) {
             $tags[] = new Tag($tagInfo['tag_id'], $tagInfo['name']);
         }
         return $tags;
     }
-    
+
+    public function getTagSuggestions(string $prefix): array
+    {
+        $prefix = strtolower($prefix) . '%'; // Convert to lowercase and add wildcard
+        $query = "SELECT name FROM Tags WHERE LOWER(name) LIKE :prefix";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':prefix' => $prefix]);
+        $suggestions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return $suggestions;
+    }
+
+
+    private function getTagByName(string $tagName)
+    {
+        $query = "SELECT * FROM Tags WHERE name = :name";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['name' => $tagName]);
+        $tagData = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($tagData) {
+            return new Tag($tagData['tag_id'], $tagData['name']);
+        } else {
+            return null;
+        }
+    }
+
 }
