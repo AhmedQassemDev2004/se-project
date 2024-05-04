@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="<?php echo $domain; ?>/css/bootstrap.min.css" />
     <style>
         body {
-            padding-top: 56px; /* Adjust based on your navbar height */
+            padding-top: 56px;
         }
 
         .container {
@@ -84,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container"> 
         <nav class="navbar navbar-dark navbar-expand-lg bg-dark fixed-top">
             <div class="container-fluid">
-                <a class="navbar-brand" href="EditUser.php?id=<?php echo $user->user_id; ?>    ">Edit User</a> 
+                <a class="navbar-brand" href="EditUser.php?id=<?php echo $user->user_id; ?>">Edit User</a> 
             </div>
         </nav>
 

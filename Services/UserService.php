@@ -222,5 +222,30 @@ class UserService implements Service
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getBadgesByUserId(int $userId): array
+{
+    try {
+        // Prepare the SQL query
+        $query = "SELECT b.name, b.type 
+                  FROM User_Badges ub
+                  INNER JOIN Badges b ON ub.badge_id = b.badge_id
+                  WHERE ub.user_id = :user_id";
+        
+        // Prepare and execute the statement
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['user_id' => $userId]);
+
+        // Fetch the badges
+        $badges = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $badges;
+    } catch (\PDOException $e) {
+        // Handle PDOException
+        // Log the error or throw a custom exception
+        throw new \Exception("Error fetching badges by user ID: " . $e->getMessage());
+    }
+}
+
 }
 

@@ -58,4 +58,42 @@ class TagService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tag_id' => $id]);
     }
+
+    public function getTagsByUserID(int $userID)
+    {
+        // Instantiate the QuestionService
+        $questionService = new QuestionService();
+
+        // Fetch questions by user ID
+        $questions = $questionService->getQuestionsByUserID($userID);
+
+        $tags = [];
+        foreach ($questions as $question) {
+            // Get tags for each question
+            $questionTags = $this->getTagsByQuestionID($question->getId());
+            $tags = array_merge($tags, $questionTags);
+        }
+        return $tags;
+    }
+
+    public function getTagsByQuestionID($questionID)
+    {
+        try {
+            // Prepare the SQL query
+            $query = "SELECT t.* FROM Tags t INNER JOIN Question_Tags qt ON t.tag_id = qt.tag_id WHERE qt.question_id = :question_id";
+
+            // Prepare and execute the statement
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['question_id' => $questionID]);
+
+            // Fetch tags
+            $tags = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $tags;
+        } catch (\PDOException $e) {
+            // Handle PDOException
+            throw new \Exception("Error fetching tags by question ID: " . $e->getMessage());
+        }
+    }
+
 }

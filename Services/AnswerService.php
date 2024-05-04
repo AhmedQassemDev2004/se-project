@@ -71,6 +71,27 @@ class AnswerService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['answer_id' => $id]);
     }
+
+    public function getAnswersByUserID($userID)
+    {
+        $query = "SELECT * FROM Answers WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['user_id' => $userID]); // Use array parameter binding for PDO
+        $answersDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        $answers = [];
+        foreach ($answersDataArray as $answerInfo) {
+            $answers[] = new Answer(
+                $answerInfo['answer_id'],
+                $answerInfo['user_id'],
+                $answerInfo['question_id'], // Ensure $question_id is converted to int
+                $answerInfo['body'],
+                $answerInfo['created_at'],
+                $answerInfo['reputations']
+            );
+        }
+        return $answers;
+    }
 }
 
 ?>
