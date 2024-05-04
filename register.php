@@ -4,18 +4,28 @@ require_once __DIR__ . "/partials/header.php";
 
 use App\Services\UserService;
 use App\Utils\Utils;
+use App\Utils\Validator;
 use App\Models\User;
 
 $userService = new UserService();
+
+$error = ""; // Initialize error variable
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = Utils::clean_input($_POST["username"]);
     $email = Utils::clean_input($_POST["email"]);
     $password = Utils::clean_input($_POST["password"]);
 
-    if ($userService->getUserByUsername($username)) {
+    // Validate inputs
+    if (!Validator::username($username)) {
+        $error = "Invalid username. Username should be between 4 and 20 characters.";
+    } elseif (!Validator::email($email)) {
+        $error = "Invalid email address.";
+    } elseif (!Validator::password($password)) {
+        $error = "Invalid password. Password should be at least 8 characters long.";
+    } elseif ($userService->getUserByUsername($username)) {
         $error = "Username already exists. Please choose another username.";
-    } else if ($userService->getUserByEmail($email)) {
+    } elseif ($userService->getUserByEmail($email)) {
         $error = "Email already exists.";
     } else {
         $user = new User(0, $username, $email, $password, null, date("Y-m-d H:i:s"), 0, 'user');
@@ -38,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card-header">Register</div>
 
                 <div class="card-body">
-                    <?php if (isset($error)): ?>
+                    <?php if (!empty($error)): ?>
                         <div class="alert alert-danger" role="alert">
                             <?php echo $error; ?>
                         </div>

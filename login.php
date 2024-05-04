@@ -1,24 +1,34 @@
 <?php
-require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/partials/header.php";
+require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/partials/header.php";
 
 use App\Services\UserService;
 use App\Utils\Utils;
+use App\Utils\Validator;
 
 $userService = new UserService();
+
+$error = ""; // Initialize error variable
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = Utils::clean_input($_POST["username"]);
     $password = Utils::clean_input($_POST["password"]);
 
-    $user = $userService->getUserByUsername($username);
-
-    if ($user && password_verify($password, $user->password)) {
-        (new \App\Services\AuthService())->auth($username);
-        header("Location: ".$domain);
-        exit();
+    // Validate inputs
+    if (!Validator::username($username)) {
+        $error = "Invalid username. Username should be between 4 and 20 characters.";
+    } elseif (!Validator::password($password)) {
+        $error = "Invalid password. Password should be at least 8 characters long.";
     } else {
-        $error = "Invalid username or password. Please try again.";
+        $user = $userService->getUserByUsername($username);
+
+        if ($user && password_verify($password, $user->password)) {
+            (new \App\Services\AuthService())->auth($username);
+            header("Location: " . $domain);
+            exit();
+        } else {
+            $error = "Invalid username or password. Please try again.";
+        }
     }
 }
 ?>
@@ -30,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card-header">Login</div>
 
                 <div class="card-body">
-                    <?php if (isset($error)) : ?>
+                    <?php if (!empty($error)): ?>
                         <div class="alert alert-danger" role="alert">
                             <?php echo $error; ?>
                         </div>
@@ -56,4 +66,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 </div>
-
