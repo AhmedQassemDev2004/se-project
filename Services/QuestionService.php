@@ -119,5 +119,31 @@ class QuestionService implements Service
         $stmt = $this->db->prepare($query);
         $stmt->execute(['question_id' => $questionId, 'tag_id' => $tagId]);
     }
+    public function getQuestionsByUserID(int $userID)
+    {
+        try {
+            $query = "SELECT * FROM Questions WHERE user_id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['user_id' => $userID]);
+            $questionDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $questions = [];
+            foreach ($questionDataArray as $questionData) {
+                $questions[] = new Question(
+                    $questionData['question_id'],
+                    $questionData['user_id'],
+                    $questionData['title'],
+                    $questionData['body'],
+                    $questionData['created_at'],
+                    $questionData['updated_at'],
+                    $questionData['reputations']
+                );
+            }
+            return $questions;
+        } catch (\PDOException $e) {
+            // Handle PDOException
+            // Log the error or throw a custom exception
+            throw new \Exception("Error fetching questions by user ID: " . $e->getMessage());
+        }
+    }
 }
-?>

@@ -46,7 +46,10 @@ if ($authService->isLoggedIn()) {
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Welcome, <?php echo $authService->getCurrentUser()->username; ?>
+                            <a class="nav-link" href="<?php echo $domain . '/profile/index.php'; ?>">
+                                <img src="<?php echo $domain . $authService->getCurrentUser()->photo; ?>" alt="User Photo"
+                                    class="user-photo rounded-circle mx-2" style="width: 32px; height: 32px;">
+                                Profile
                             </a>
                         </li>
                         <?php if ($authService->getCurrentUser()->getRole() == "admin"): ?>

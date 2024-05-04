@@ -172,6 +172,34 @@ class AnswerService implements Service
         }
         return $answers;
     }
+
+    public function getAnswersByUserID($userID)
+    {
+        try {
+
+            $query = "SELECT * FROM Answers WHERE user_id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['user_id' => $userID]); // Use array parameter binding for PDO
+            $answersDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $answers = [];
+            foreach ($answersDataArray as $answerInfo) {
+                $answers[] = new Answer(
+                    $answerInfo['user_id'],
+                    $answerInfo['question_id'],
+                    $answerInfo['body'],
+                    $answerInfo['created_at'],
+                    $answerInfo['answer_id'],
+                    $answerInfo['reputations']
+                );
+            }
+            return $answers;
+        } catch (Exception $ex) {
+            var_dump($ex);
+        }
+
+        return [];
+    }
 }
 
 ?>
