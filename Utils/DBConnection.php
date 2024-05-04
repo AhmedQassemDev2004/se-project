@@ -11,19 +11,24 @@ class DBConnection
     private string $db_name = 'se-project';
     private string $username = 'root';
     private string $password = '';
-    private $conn = null;
+    private static $conn = null;
 
-    public function getConnection()
+    private function __construct()
     {
-        $this->conn = null;
+    }
 
-        try {
-            $this->conn = new PDO("mysql:host={$this->host};dbname={$this->db_name}", $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
+    public static function getConnection()
+    {
+        if (self::$conn === null) {
+            try {
+                $instance = new self();
+                self::$conn = new PDO("mysql:host={$instance->host};dbname={$instance->db_name}", $instance->username, $instance->password);
+                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $exception) {
+                echo "Connection error: " . $exception->getMessage();
+            }
         }
 
-        return $this->conn;
+        return self::$conn;
     }
 }

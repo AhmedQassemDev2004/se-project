@@ -1,15 +1,12 @@
 <?php
-// Include the necessary files
 require_once __DIR__ . "/../../vendor/autoload.php";
 require_once __DIR__ . "/../../Utils/config.php";
 require_once __DIR__ . "/../partials/admin_header.php";
 
 use App\Services\UserService;
 
-// Create an instance of the UserService
 $userService = new UserService();
 
-// Initialize variables
 $users = [];
 $error = '';
 
@@ -39,7 +36,6 @@ $users = $userService->getAll();
         </thead>
         <tbody>
             <?php
-            // Fetch users from the database and display them in the table
             if ($users) {
                 foreach ($users as $user) {
                     echo "<tr>";

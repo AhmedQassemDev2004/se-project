@@ -14,8 +14,7 @@ class VotingService implements Service
 
     public function __construct()
     {
-        $dbConnection = new DBConnection();
-        $this->db = $dbConnection->getConnection();
+        $this->db = DBConnection::getConnection();
         $this->notificationService = new NotificationService();
     }
 
