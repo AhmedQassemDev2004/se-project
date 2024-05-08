@@ -108,4 +108,24 @@ class TagService implements Service
         }
     }
 
+    public function getAllTagsOrderedByQuestionCount()
+    {
+        $query = "SELECT Tags.*, COUNT(Question_Tags.tag_id) AS question_count
+                FROM Tags
+                LEFT JOIN Question_Tags ON Tags.tag_id = Question_Tags.tag_id
+                GROUP BY Tags.tag_id
+                ORDER BY question_count DESC";
+        $stmt = $this->db->query($query);
+        $tagsDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $tags = [];
+        foreach ($tagsDataArray as $tagData) {
+            $tag = new Tag($tagData['tag_id'], $tagData['name']);
+            $tag->setQuestionCount($tagData['question_count']);
+            if ($tagData['question_count'] > 0)
+                $tags[] = $tag;
+        }
+
+        return $tags;
+    }
 }

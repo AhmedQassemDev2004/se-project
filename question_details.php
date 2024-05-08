@@ -1,9 +1,8 @@
 <?php
-
 namespace App;
 
-require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/partials/header.php";
+require_once __DIR__ . "/vendor/autoload.php";
 
 use App\Models\Vote;
 use App\Models\Answer;
@@ -27,21 +26,18 @@ $logged_in_user = $authService->getCurrentUser();
 $userID = $logged_in_user->getUserId();
 $isAdmin = $logged_in_user->getRole() == "admin";
 
-
-// Retrieve the question ID from the URL parameter
+// Retrieving the question ID from the URL parameter
 if (isset($_GET['id'])) {
     $questionId = $_GET['id'];
 
     $question = $questionService->getById($questionId);
     $answers = $answerService->getAnswersByQuestionID($questionId);
-
 } else {
     header("Location: index.php");
     exit();
 }
 
-
-// Handle delete question submission
+// Handling delete question submission
 if (isset($_POST['delete_question'])) {
     $questionID = $_POST['question_id'];
 
@@ -51,15 +47,13 @@ if (isset($_POST['delete_question'])) {
     exit();
 }
 
-// Handle voting
+// Handling voting for questions
 if (isset($_POST['vote_question'])) {
     $questionID = $_POST['question_id'];
-    $userID = $_POST['user_id'];
     $voteType = $_POST['vote_type'];
 
     $vote = new Vote($logged_in_user->getUserId(), $questionID, 0, $voteType);
 
-    // Handle the reputation process
     $reputation = $question->getReputations();
 
     if ($voteService->add_vote($vote)) {
@@ -80,24 +74,19 @@ if (isset($_POST['vote_question'])) {
 
     $questionService->update($questionID, $question);
 
-    // Redirect or refresh the page after voting
     header("Location: question_details.php?id=$questionID");
     exit;
 }
 
+// Handling voting for answers
 if (isset($_POST["vote_answer"])) {
     $votedAnswerId = $_POST['answer_id'];
-    $userID = $_POST['user_id'];
     $voteType = $_POST['vote_type'];
 
-    // Check if the answer exists before adding a vote
     $voted_answer = $answerService->getById($votedAnswerId);
     if ($voted_answer) {
-        // Answer exists, proceed with adding the vote
         $vote = new Vote($logged_in_user->getUserId(), 0, $votedAnswerId, $voteType);
-
         $reputation = $voted_answer->getReputations();
-
         if ($voteService->add_vote($vote, "answer")) {
             if ($voteType == "upvote") {
                 $reputation += 1;
@@ -113,133 +102,143 @@ if (isset($_POST["vote_answer"])) {
         }
 
         $voted_answer->setReputations($reputation);
-
         $answerService->update($votedAnswerId, $voted_answer);
 
-        header("Refresh:0");
+        header("Location: .");
         exit;
     } else {
-        // Answer does not exist, handle this case (e.g., show an error message)
         echo "Error: The answer does not exist.";
     }
 }
 
-
-?>
-
-<?php
-// Handle answer submission
+// Handling answer submission
 if (isset($_POST['submit_answer'])) {
     $answerText = $_POST['answer'];
     $questionID = $_POST['question_id'];
 
     $currentDateTime = date("Y-m-d H:i:s");
-    // Create an Answer object
     $voted_answer = new Answer($logged_in_user->getUserId(), $questionID, $answerText, $currentDateTime, null, null);
 
-    // Use the AnswerService to save the answer
     $answerService = new AnswerService();
     $answerService->create($voted_answer);
-
-
     header_remove("Location");
     header("Location: question_details.php?id=" . $questionID);
     exit;
 }
 
+// Handling delete answer submission
+if (isset($_POST['delete_answer'])) {
+    $answerId = $_POST['answer_id'];
+
+    $answerService->delete($answerId);
+
+    header("Location: index.php");
+    exit();
+}
+
 ?>
 
-<div class="container">
+<div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-            <div class="card mb-4 mt-4">
+            <div class="card bg-light mb-4">
                 <div class="card-body">
                     <h5 class="card-title"><?php echo $question->getTitle(); ?></h5>
                     <p class="card-text"><strong>Tags:</strong>
                         <?php foreach ($tagService->getTagsByQuestionID($question->getQuestionID()) as $tag): ?>
-                            <span class="badge rounded-pill text-bg-info"><?php echo $tag->getName(); ?></span>
+                            <span class="badge bg-primary"><?php echo $tag->getName(); ?></span>
                         <?php endforeach; ?>
                     </p>
                     <p class="card-text"><?php echo $question->getBody(); ?></p>
                     <p class="card-text"><small class="text-muted">Posted by
                             <?php echo $userService->getById($question->getUserID())->getUsername(); ?> | Created at
                             <?php echo $question->getCreatedAt(); ?></small></p>
-                    <div class="btn-group mb-2" role="group" aria-label="Vote Question">
+                    <div class="btn-group gap-2" role="group" aria-label="Vote Question">
                         <form method="post">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-                            <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-success d-flex p-2" name="vote_type" value="upvote"
-                                style="width: 50px; margin-left: 15px;"><span>⬆</span> <span>
-                                    <?php echo $voteService->getUpvotesCount($question->getQuestionId()) ?></span>
-                            </button>
+                            <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-thumbs-up"></i>
+                                <?php echo $voteService->getUpvotesCount($question->getQuestionId()) ?></button>
                             <input type="hidden" name="vote_question" value="true">
+                            <input type="hidden" name="vote_type" value="upvote">
                         </form>
                         <form method="post">
-                            <input type="hidden" name="vote_question" value="true">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-                            <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <button type="submit" class="btn btn-danger d-flex p-2" name="vote_type" value="downvote"
-                                style="width: 50px; margin-left: 15px;"> <span>⬇</span>
-                                <span><?php echo $voteService->getDownvotesCount($question->getQuestionId()) ?></span>
-                            </button>
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-thumbs-down"></i>
+                                <?php echo $voteService->getDownvotesCount($question->getQuestionId()) ?></button>
+                            <input type="hidden" name="vote_question" value="true">
+                            <input type="hidden" name="vote_type" value="downvote">
                         </form>
+                        <?php if ($question->getUserID() == $userID || $isAdmin): ?>
+                            <form method="post" action="">
+                                <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i>
+                                    Delete</button>
+                                <input type="hidden" name="delete_question" value="true">
+                            </form>
+                        <?php endif; ?>
                     </div>
-                    <?php if ($question->getUserID() == $logged_in_user->getUserId()): ?>
-                        <form method="post">
-                            <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-                            <a href="edit_question.php?id=<?php echo $question->getQuestionID(); ?>"
-                                class="btn btn-primary w-25">Edit</a>
-                            <button type="submit" class="btn btn-danger w-25" name="delete_question">Delete</button>
-                        </form>
-                    <?php endif; ?>
+
                 </div>
             </div>
 
-            <form method="post">
-                <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
-                <div class="form-group">
-                    <label for="answer">Your Answer:</label>
-                    <textarea class="form-control" name="answer" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary mt-2" name="submit_answer">Submit Answer</button>
-            </form>
-
-            <h2>Answers</h2>
             <?php foreach ($answers as $ans): ?>
-                <div class="card mb-3">
+                <div class="card bg-light mb-3">
                     <div class="card-body">
                         <p class="card-text"><?php echo $ans->getBody(); ?></p>
                         <p class="card-text"><small class="text-muted">Posted by
                                 <?php echo $userService->getById($ans->getUserID())->getUsername(); ?> | Created at
                                 <?php echo $ans->getCreatedAt(); ?></small></p>
-                    </div>
-                    <div class="btn-group mb-2" role="group" aria-label="Vote Answer">
-                        <form method="post">
-                            <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
-                            <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <input type="hidden" name="vote_answer" value="true">
-                            <button type="submit" class="btn btn-sm btn-success d-flex p-2" name="vote_type" value="upvote"
-                                style="width: 50px; margin-left: 15px;"> <span>⬆</span> <span>
-                                    <?php echo $voteService->getUpvotesCountForAnswers($ans->getAnswerId()); ?>
-                                </span></button>
-                        </form>
-                        <form method="post">
-                            <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
-                            <input type="hidden" name="user_id" value="<?php echo $userID; ?>">
-                            <input type="hidden" name="vote_answer" value="true">
-                            <button type="submit" class="btn btn-sm btn-danger d-flex p-2" name="vote_type" value="downvote"
-                                style="width: 50px; margin-left: 15px;"><span>⬇</span> <span>
-                                    <?php echo $voteService->getDownvotesCountForAnswers($ans->getAnswerId()); ?>
-                                </span></button>
-                        </form>
+                        <div class="btn-group gap-2" role="group" aria-label="Vote Answer">
+                            <form method="post">
+                                <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
+                                <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-thumbs-up"></i>
+                                    <?php echo $voteService->getUpvotesCountForAnswers($ans->getAnswerId()); ?></button>
+                                <input type="hidden" name="vote_answer" value="true">
+                                <input type="hidden" name="vote_type" value="upvote">
+                            </form>
+                            <form method="post">
+                                <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-thumbs-down"></i>
+                                    <?php echo $voteService->getDownvotesCountForAnswers($ans->getAnswerId()); ?></button>
+                                <input type="hidden" name="vote_answer" value="true">
+                                <input type="hidden" name="vote_type" value="downvote">
+                            </form>
+                        </div>
+                        <?php if ($ans->getUserID() == $userID): ?>
+                            <div class="btn-group" role="group" aria-label="Answer Actions">
+                                <form method="post" action="edit_answer.php">
+                                    <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
+                                    <button type="submit" class="btn btn-link"><i class="fas fa-edit"></i></button>
+                                </form>
+                                <form method="post" action=""
+                                    onsubmit="return confirm('Are you sure you want to delete this answer?')">
+                                    <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
+                                    <button type="submit" class="btn btn-link"><i class="fas fa-trash-alt"></i></button>
+                                    <input type="hidden" name="delete_answer" value="true">
+                                </form>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
+
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Your Answer</h5>
+                    <form method="post">
+                        <input type="hidden" name="question_id" value="<?php echo $questionId ?>">
+                        <div class="form-group">
+                            <textarea class="form-control" name="answer" rows="3" placeholder="Enter your answer here"
+                                required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Your Answer</button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
-<?php
-require_once __DIR__ . "/partials/footer.php";
-?>
+<?php require_once __DIR__ . "/partials/footer.php"; ?>

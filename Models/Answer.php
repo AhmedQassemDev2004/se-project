@@ -18,7 +18,7 @@ class Answer
         $this->question_id = $question_id;
         $this->body = $body;
         $this->created_at = $created_at;
-        $this->reputations = $reputations;
+        $this->reputations = $reputations == null ? 0 : $reputations;
     }
 
     // Getters

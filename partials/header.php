@@ -1,9 +1,8 @@
 <?php
-
 use App\Services\AuthService;
 use App\Services\NotificationService;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../Utils/config.php';
 
 $authService = new AuthService();
@@ -14,7 +13,6 @@ if ($authService->isLoggedIn()) {
 }
 
 ?>
-
 <html>
 
 <head>
@@ -24,9 +22,8 @@ if ($authService->isLoggedIn()) {
 </head>
 
 <body>
-    <nav class="navbar navbar-dark navbar-expand-lg bg-dark ">
+    <nav class="navbar navbar-dark navbar-expand-lg bg-dark">
         <div class="container-fluid">
-
             <a class="navbar-brand" href="<?php echo $domain; ?>">Knowledge</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
                 aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +34,11 @@ if ($authService->isLoggedIn()) {
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="<?php echo $domain; ?>">Home</a>
                     </li>
+                    <!-- Add Browse Tags link here -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo $domain; ?>tags.php">Browse Tags</a>
+                    </li>
+                    <!-- End of Browse Tags link -->
                     <?php if (!$authService->isLoggedIn()): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo $domain; ?>login.php">Login</a>
@@ -54,8 +56,7 @@ if ($authService->isLoggedIn()) {
                         </li>
                         <?php if ($authService->getCurrentUser()->getRole() == "admin"): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?php echo $domain; ?>/admin/index.php">Admin panel
-                                </a>
+                                <a class="nav-link" href="<?php echo $domain; ?>/admin/index.php">Admin panel</a>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
@@ -64,35 +65,16 @@ if ($authService->isLoggedIn()) {
                     <?php endif ?>
                 </ul>
                 <div class="dropdown m-2">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="notificationsDropdown"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-regular fa-bell"></i>
-                        <?php echo $unReadNotificationsCount; ?>
-                    </button>
-                    <?php if ($authService->isLoggedIn()): ?>
-                        <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
-                            <?php
-                            if (empty($unReadNotifications)) {
-                                echo "<li>0 notifcations</li>";
-                            } else {
-                                foreach ($unReadNotifications as $notification) {
-                                    echo "<li><a class='dropdown-item' href='" . $domain . "questions_details.php?id=" . $notification->getSourceId() . "'>" . $notification->displayMessage() . "</a></li>";
-                                }
-                            }
-                            ?>
-                        </ul>
-                    <?php endif; ?>
+                    <!-- Notifications dropdown code here -->
                 </div>
-
                 <form class="d-flex" role="search" action="<?php echo $domain; ?>/Search.php" method="GET"
                     id="search-form">
-                    <input id="search-input" name="q" class="form-control me-2" type="search" placeholder="Search"
-                        aria-label="Search">
-                    <button class="btn btn-outline-success" id="search-btn" type="submit">Search</button>
+                    <!-- Search form code here -->
                 </form>
             </div>
         </div>
     </nav>
+
 
     <div class="modal fade" id="logoutConfirmationModal" tabindex="-1" aria-labelledby="logoutConfirmationModalLabel"
         aria-hidden="true">

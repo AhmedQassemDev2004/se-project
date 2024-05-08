@@ -47,9 +47,8 @@ $badges = $userService->getbadgesByUserID($userId);
         </div>
         <div class="card-body">
             <?php
-            if (empty($badges)) {
+            if (empty($badges))
                 echo "<h3>No badges yet</h3>";
-            }
             ?>
             <ul class="list-group">
                 <?php

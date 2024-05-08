@@ -25,7 +25,10 @@ class VotingService implements Service
 
     public function add_vote(object $data, string $for = "question")
     {
+        echo "ammmm";
         try {
+            $targeted_user_id = $for == "question" ? (new QuestionService())->getById($data->getQuestionId())->getUserId() : (new AnswerService())->getById($data->getAnswerId())->getUserId();
+
             if ($for == "question") {
                 // Check if the user has already voted on this question
                 $query = "SELECT * FROM Votes WHERE question_id = :question_id AND user_id = :user_id";
@@ -49,10 +52,10 @@ class VotingService implements Service
                         'type' => $data->getVoteType()
                     ]);
 
-                    // Add notification
                     $notificationData = new Notification(
                         0,
                         $data->getUserId(),
+                        $targeted_user_id,
                         'vote_on_question',
                         $data->getQuestionId(),
                         false
@@ -63,11 +66,13 @@ class VotingService implements Service
                     return true;
                 }
             } else {
-                // Check if the user has already voted on this answer
+                echo "ammm!";
                 $query = "SELECT * FROM Votes WHERE answer_id = :answer_id AND user_id = :user_id";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute(['answer_id' => $data->getAnswerId(), 'user_id' => $data->getUserId()]);
                 $voteData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                echo "well!";
 
                 if ($voteData) {
                     // Update the existing vote
@@ -85,13 +90,16 @@ class VotingService implements Service
                         'type' => $data->getVoteType()
                     ]);
 
+                    echo "added answer\n";
                     $notificationData = new Notification(
                         0,
                         $data->getUserId(),
+                        $targeted_user_id,
                         'vote_on_answer',
                         $data->getAnswerId(),
                         false,
                     );
+                    echo "added notification\n";
 
                     $this->notificationService->create($notificationData);
 
