@@ -1,44 +1,35 @@
 <?php
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../../partials/header.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/admin_header.php";
+}
 
 use App\Services\TagService;
 
 $tagService = new TagService();
 
-// Check if the tag ID is provided in the URL
-if (!isset($_GET["tag_id"])) 
-{
-    // Redirect to the tags page if tag ID is not provided
+if (!isset($_GET["tag_id"])) {
     header("Location: tags.php");
     exit();
 }
 
-// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Get the edited tag details from the form
     $tag_id = $_POST["tag_id"];
     $name = $_POST["name"];
-    
+
     $tagService = new TagService();
 
-    // Update the tag details
-    $tagService->update($tag_id, (object)["name" => $name]);
+    $tagService->update($tag_id, (object) ["name" => $name]);
 
-    // Redirect back to the tags page after updating
     header("Location: .");
     exit();
 }
 
-// Get the tag ID from the URL
 $tag_id = $_GET["tag_id"];
 
-// Get the tag details by ID
 $tag = $tagService->getById($tag_id);
 
-// Check if the tag exists
 if (!$tag) {
-    // Redirect to the tags page if tag does not exist
     header("Location: tags.php");
     exit();
 }

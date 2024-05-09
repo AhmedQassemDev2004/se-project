@@ -78,6 +78,6 @@ CREATE TABLE Notifications (
     source_id INT,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES Users(targeted_user_id) ON DELETE CASCADE
 );

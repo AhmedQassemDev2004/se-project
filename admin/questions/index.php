@@ -1,6 +1,8 @@
 <?php
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../partials/admin_header.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/admin_header.php";
+}
 
 use App\Services\QuestionService;
 use App\Services\UserService;
@@ -9,7 +11,6 @@ $questionService = new QuestionService();
 $userService = new UserService();
 $questions = $questionService->getAll();
 
-// Handle delete question submission
 if (isset($_POST['delete_question'])) {
     $questionID = $_POST['question_id'];
 
@@ -52,7 +53,7 @@ if (isset($_POST['delete_question'])) {
                             echo "<td>" . $question->getReputations() . "</td>";
                             echo "<td>";
                             echo "<form method='post' onsubmit='return confirm(\"Are you sure you want to delete this question?\")'>";
-                            echo "<input type='hidden' name='question_id' value='" . $question->getQuestionID()."' />";
+                            echo "<input type='hidden' name='question_id' value='" . $question->getQuestionID() . "' />";
                             echo "<button type='submit' class='btn btn-sm btn-danger d-flex p-2' name='delete_question'>Delete</button>";
                             echo "</form>";
                             echo "</td>";

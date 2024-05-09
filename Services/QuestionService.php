@@ -41,7 +41,7 @@ class QuestionService implements Service
 
     public function getAll()
     {
-        $query = "SELECT * FROM Questions";
+        $query = "SELECT * FROM Questions ORDER BY question_id DESC";
         $stmt = $this->db->query($query);
         $questionDataArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $questions = [];
@@ -144,6 +144,50 @@ class QuestionService implements Service
             // Handle PDOException
             // Log the error or throw a custom exception
             throw new \Exception("Error fetching questions by user ID: " . $e->getMessage());
+        }
+
+        return [];
+    }
+
+    public function getMostUpvotedQuestions(): array
+    {
+        try {
+            // Query to get the most upvoted questions
+            $query = "SELECT q.question_id, q.title, COUNT(v.vote_id) AS upvotes
+                      FROM Questions q
+                      LEFT JOIN Votes v ON q.question_id = v.question_id AND v.type = 'up'
+                      GROUP BY q.question_id, q.title
+                      ORDER BY upvotes DESC
+                      LIMIT 5"; // Limit to the top 5 most upvoted questions
+
+            // Execute the query
+            $stmt = $this->db->query($query);
+
+            // Fetch the results
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            // Handle PDOException
+            throw new \Exception("Error fetching most upvoted questions: " . $e->getMessage());
+        }
+    }
+
+    public function getQuestionsWithHighestReputations(): array
+    {
+        try {
+            // Query to get the questions with the highest reputations
+            $query = "SELECT question_id, title, reputations
+                      FROM Questions
+                      ORDER BY reputations DESC
+                      LIMIT 5"; // Limit to the top 5 questions with highest reputations
+
+            // Execute the query
+            $stmt = $this->db->query($query);
+
+            // Fetch the results
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            // Handle PDOException
+            throw new \Exception("Error fetching questions with highest reputations: " . $e->getMessage());
         }
     }
 }

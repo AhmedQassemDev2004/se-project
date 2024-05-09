@@ -128,4 +128,15 @@ class TagService implements Service
 
         return $tags;
     }
+
+    public function getTagQuestionCount(int $id)
+    {
+        $query = "SELECT COUNT(question_id) AS question_count FROM Question_Tags WHERE tag_id = :tag_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['tag_id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['question_count'];
+    }
+
 }

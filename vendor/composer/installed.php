@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'e341f17b7e069fb838fc957479080c828e72f756',
+        'reference' => 'c9f5d6000abcb34bb3ef1c9e5f9f686c55451ae5',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'e341f17b7e069fb838fc957479080c828e72f756',
+            'reference' => 'c9f5d6000abcb34bb3ef1c9e5f9f686c55451ae5',
             'dev_requirement' => false,
         ),
         'tecnickcom/tcpdf' => array(

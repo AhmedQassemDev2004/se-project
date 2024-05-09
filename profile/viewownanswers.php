@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . "/../partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/header.php";
+}
 require_once __DIR__ . "/../vendor/autoload.php";
 require_once __DIR__ . "/../Utils/config.php";
 use App\Services\AnswerService;

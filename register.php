@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/partials/header.php";
+}
+
 
 use App\Services\UserService;
 use App\Utils\Utils;
@@ -11,7 +14,7 @@ $userService = new UserService();
 
 $error = ""; // Initialize error variable
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST['register'])) {
     $username = Utils::clean_input($_POST["username"]);
     $email = Utils::clean_input($_POST["email"]);
     $password = Utils::clean_input($_POST["password"]);
@@ -29,18 +32,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Email already exists.";
     } else {
         $user = new User(0, $username, $email, $password, null, date("Y-m-d H:i:s"), 0, 'user');
+        $user->setPhoto("uploads/no-image.webp");
         $userId = $userService->create($user);
         if ($userId) {
             (new \App\Services\AuthService())->auth($username);
-            header("Location: " . $domain);
+            header("Location: " . $domain . 'index.php');
             exit();
         } else {
             $error = "Registration failed. Please try again.";
         }
     }
-}
-?>
 
+    if ($error) {
+        header("Location: " . $domain . "register.php?error=" . $error);
+    }
+}
+
+$error = $_GET['error'];
+?>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -71,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Register</button>
+                            <button type="submit" name="register" class="btn btn-primary">Register</button>
                         </div>
                     </form>
                 </div>

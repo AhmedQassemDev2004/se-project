@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../../Utils/config.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
+require_once __DIR__ . "/../../Utils/config.php";
 
 use App\Services\UserService;
 
@@ -69,14 +69,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Add User</title>
     <link rel="stylesheet" href="<?php echo $domain; ?>/css/bootstrap.min.css" />
     <style>
-    body {
-        padding-top: 56px;
-        /* Adjust based on your navbar height */
-    }
+        body {
+            padding-top: 56px;
+            /* Adjust based on your navbar height */
+        }
 
-    .container {
-        margin-top: 20px;
-    }
+        .container {
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -96,9 +96,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container">
         <!-- Alert message -->
         <?php if (!empty($alertMessage)): ?>
-        <div class="alert alert-<?php echo $alertType; ?>" role="alert">
-            <?php echo $alertMessage; ?>
-        </div>
+            <div class="alert alert-<?php echo $alertType; ?>" role="alert">
+                <?php echo $alertMessage; ?>
+            </div>
         <?php endif; ?>
 
         <!-- User form -->

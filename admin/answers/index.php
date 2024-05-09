@@ -1,17 +1,18 @@
 <?php
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../partials/admin_header.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/admin_header.php";
+}
+
 
 use App\Services\AnswerService;
 use App\Services\UserService;
 use \App\Services\QuestionService;
 
-// Create instance of AnswerService
 $answerService = new AnswerService();
 $userService = new UserService();
 $questionService = new QuestionService();
 
-// Get all answers
 $answers = $answerService->getAll();
 
 if (isset($_POST['delete_answer'])) {
@@ -52,7 +53,7 @@ if (isset($_POST['delete_answer'])) {
                             echo "<td>" . $answer->getReputations() . "</td>";
                             echo "<td>";
                             echo "<form method='post' onsubmit='return confirm(\"Are you sure you want to delete this answer?\")'>";
-                            echo "<input type='hidden' name='answer_id' value='" . $answer->getAnswerId()."' />";
+                            echo "<input type='hidden' name='answer_id' value='" . $answer->getAnswerId() . "' />";
                             echo "<button type='submit' class='btn btn-sm btn-danger d-flex p-2' name='delete_answer'>Delete</button>";
                             echo "</form>";
                             echo "</td>";

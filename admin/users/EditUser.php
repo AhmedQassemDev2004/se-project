@@ -1,64 +1,46 @@
 <?php
-// Include the necessary files
 require_once __DIR__ . "/../../vendor/autoload.php";
 require_once __DIR__ . "/../../Utils/config.php";
 use App\Services\UserService;
 
-// Create an instance of the UserService
 $userService = new UserService();
 
-// Initialize variables
 $user = null;
 $message = '';
 
-// Check if user ID is provided in the URL
 if (isset($_GET['id'])) {
     $userId = $_GET['id'];
 
-    // Fetch user data by user ID
     $user = $userService->getById($userId);
 
-    // Check if the user exists
     if (!$user) {
         $message = 'User not found.';
     }
 } else {
-    // If user ID is not provided, display an error message
     $message = 'User ID is missing.';
 }
 
-// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST" && $user) {
-    // Retrieve form data
     $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     $role = $_POST['role'] ?? '';
 
-    // Check if any changes were made
     if ($username === $user->username && $email === $user->email && $role === $user->role) {
         $message = "No changes made.";
     } else {
-        // Validate form data
         if (!empty($username) && !empty($email) && !empty($role)) {
-            // Update user data
-            $userData = (object) [
-                'username' => $username,
-                'email' => $email,
-                'role' => $role
-            ];
+            $user->setUsername($username);
+            $user->setEmail($email);
+            $user->setRole($role);
 
-            // Call the update method of UserService to update the user in the database
-            $success = $userService->update($userId, $userData);
+            $success = $userService->update($userId, $user);
 
             if ($success) {
-                // User updated successfully
                 $message = "User updated successfully";
             } else {
-                // Failed to update user
                 $message = 'Failed to update user';
             }
         } else {
-            // If form fields are empty, display an error message
             $message = 'Please fill out all fields';
         }
     }
@@ -76,7 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $user) {
     <style>
         body {
             padding-top: 56px;
-            /* Adjust based on your navbar height */
         }
 
         .container {

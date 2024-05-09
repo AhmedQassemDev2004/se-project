@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/partials/header.php";
+}
 
 use App\Services\UserService;
 use App\Utils\Utils;
@@ -10,7 +12,7 @@ $userService = new UserService();
 
 $error = ""; // Initialize error variable
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST['login'])) {
     $username = Utils::clean_input($_POST["username"]);
     $password = Utils::clean_input($_POST["password"]);
 
@@ -22,15 +24,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $user = $userService->getUserByUsername($username);
 
-        if ($user && password_verify($password, $user->password)) {
+        if ($user && $password == $user->password) {
             (new \App\Services\AuthService())->auth($username);
-            header("Location: " . $domain);
+            header("Location: " . $domain . 'index.php');
             exit();
         } else {
             $error = "Invalid username or password. Please try again.";
         }
     }
+
+    if ($error) {
+        header("Location: " . $domain . "login.php?error=" . $error);
+    }
 }
+
+$error = $_GET['error'];
 ?>
 
 <div class="container mt-5">
@@ -58,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" name="login" class="btn btn-primary">Login</button>
                         </div>
                     </form>
                 </div>

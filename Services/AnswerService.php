@@ -27,21 +27,21 @@ class AnswerService implements Service
         $query = "INSERT INTO Answers (user_id, question_id, body, created_at, reputations) VALUES (:user_id, :question_id, :body, :created_at, :reputations)";
         $stmt = $this->db->prepare($query);
         $stmt->execute([
-            'user_id' => $data->user_id,
-            'question_id' => $data->question_id,
+            'user_id' => $data->user_id, // Access user_id directly
+            'question_id' => $data->question_id, // Access question_id directly
             'body' => $data->body,
             'created_at' => $data->created_at,
             'reputations' => $data->reputations
         ]);
 
         try {
-            $targetedUserId = (new QuestionService())->getById($data->getQuestionId())->getUserId();
+            $targetedUserId = (new QuestionService())->getById($data->question_id)->getUserId();
             $notification = new Notification(
                 0,
-                $data->getUserId(),
+                $data->user_id, // Access user_id directly
                 $targetedUserId,
                 'answer',
-                $data->getQuestionId(),
+                $data->question_id, // Access question_id directly
                 false
             );
 
@@ -49,7 +49,6 @@ class AnswerService implements Service
                 $notification
             );
 
-            // Update user's reputation and assign badges
             $this->updateUserReputationAndBadges($data->user_id);
 
         } catch (Exception $ex) {
@@ -59,41 +58,44 @@ class AnswerService implements Service
         return $this->db->lastInsertId();
     }
 
-    // Update user's reputation and assign badges based on reputation milestones
+
     private function updateUserReputationAndBadges($userId)
     {
-        $user = $this->userService->getById($userId);
-        $updatedReputation = $user->getReputations() + 10; // Assuming each answer adds 10 reputations
+        try {
+            $user = $this->userService->getById($userId);
+            $updatedReputation = $user->getReputations() + 10;
 
-        // Check if the user qualifies for a badge
-        if ($updatedReputation >= 100 && $updatedReputation < 500) {
-            // Bronze Badge
-            $badgeId = 1; // Assuming 1 is the ID for the Bronze badge
-        } elseif ($updatedReputation >= 500 && $updatedReputation < 1000) {
-            // Silver Badge
-            $badgeId = 2; // Assuming 2 is the ID for the Silver badge
-        } elseif ($updatedReputation >= 1000) {
-            // Gold Badge
-            $badgeId = 3; // Assuming 3 is the ID for the Gold badge
-        }
-
-        if (isset($badgeId)) {
-            // Check if the user already has this badge
-            $existingBadge = $this->db->prepare("SELECT * FROM User_Badges WHERE user_id = :user_id AND badge_id = :badge_id");
-            $existingBadge->execute(['user_id' => $userId, 'badge_id' => $badgeId]);
-            $badgeExists = $existingBadge->fetch();
-
-            if (!$badgeExists) {
-                // If the user doesn't have this badge, assign it
-                $insertBadge = $this->db->prepare("INSERT INTO User_Badges (user_id, badge_id) VALUES (:user_id, :badge_id)");
-                $insertBadge->execute(['user_id' => $userId, 'badge_id' => $badgeId]);
+            // Determine the badge based on the updated reputation
+            $badgeId = null;
+            if ($updatedReputation >= 100 && $updatedReputation < 500) {
+                $badgeId = 1;
+            } elseif ($updatedReputation >= 500 && $updatedReputation < 1000) {
+                $badgeId = 2;
+            } elseif ($updatedReputation >= 1000) {
+                $badgeId = 3;
             }
-        }
 
-        // Update user's reputation
-        $user->setReputations($updatedReputation);
-        $this->userService->update($userId, $user);
+            // Check if the user already has the badge
+            if ($badgeId !== null) {
+                $existingBadge = $this->db->prepare("SELECT * FROM User_Badges WHERE user_id = :user_id AND badge_id = :badge_id");
+                $existingBadge->execute(['user_id' => $userId, 'badge_id' => $badgeId]);
+                $badgeExists = $existingBadge->fetch();
+
+                // If the user doesn't have the badge, assign it
+                if (!$badgeExists) {
+                    $insertBadge = $this->db->prepare("INSERT INTO User_Badges (user_id, badge_id) VALUES (:user_id, :badge_id)");
+                    $insertBadge->execute(['user_id' => $userId, 'badge_id' => $badgeId]);
+                }
+            }
+
+            // Update user's reputation
+            (new UserService())->increaseReputations($userId, 10);
+        } catch (Exception $ex) {
+            // Handle the exception
+            var_dump($ex);
+        }
     }
+
 
 
     public function getById(int $id)

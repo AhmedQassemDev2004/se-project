@@ -1,12 +1,14 @@
 <?php
 session_start();
-require_once __DIR__ . "/../partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/header.php";
+}
+
 require_once __DIR__ . "/../vendor/autoload.php";
 require_once __DIR__ . "/../Utils/config.php";
 
 use App\Services\UserService;
 use App\Services\AuthService;
-
 
 $userService = new UserService();
 $authService = new AuthService();
@@ -18,12 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '';
     $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
 
-    $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
+    $password = $_POST['password'];
 
+    $targetDir = __DIR__ . '/../uploads/';
 
     try {
         if ($_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-            $targetDir = __DIR__ . '/uploads/';
             $targetFile = $targetDir . basename($_FILES['photo']['name']);
             move_uploaded_file($_FILES['photo']['tmp_name'], $targetFile);
             $photo = 'uploads/' . basename($_FILES['photo']['name']);

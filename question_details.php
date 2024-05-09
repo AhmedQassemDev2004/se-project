@@ -1,7 +1,10 @@
 <?php
 namespace App;
 
-require_once __DIR__ . "/partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/partials/header.php";
+}
+
 require_once __DIR__ . "/vendor/autoload.php";
 
 use App\Models\Vote;
@@ -12,6 +15,7 @@ use App\Services\UserService;
 use App\Services\AnswerService;
 use App\Services\VotingService;
 use App\Services\AuthService;
+use App\Utils\Utils;
 
 $authService = new AuthService();
 $questionService = new QuestionService();
@@ -74,6 +78,8 @@ if (isset($_POST['vote_question'])) {
 
     $questionService->update($questionID, $question);
 
+
+    header_remove("Location");
     header("Location: question_details.php?id=$questionID");
     exit;
 }
@@ -104,7 +110,8 @@ if (isset($_POST["vote_answer"])) {
         $voted_answer->setReputations($reputation);
         $answerService->update($votedAnswerId, $voted_answer);
 
-        header("Location: .");
+        header_remove("Location");
+        header("Location: " . $domain . "question_details.php?id=" . $questionId);
         exit;
     } else {
         echo "Error: The answer does not exist.";
@@ -131,8 +138,8 @@ if (isset($_POST['delete_answer'])) {
     $answerId = $_POST['answer_id'];
 
     $answerService->delete($answerId);
+    header("Location: question_details.php?id=" . $questionId);
 
-    header("Location: index.php");
     exit();
 }
 
@@ -143,17 +150,30 @@ if (isset($_POST['delete_answer'])) {
         <div class="col-md-8">
 
             <div class="card bg-light mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <?php $user = $userService->getById($question->getUserID()); ?>
+                        <?php $userImage = $user->photo; ?>
+                        <img src="<?php echo $userImage; ?>" alt="User Photo" class="rounded-circle me-2"
+                            style="width: 40px; height: 40px;">
+                        <div>
+                            <h6 class="mb-0"><?php echo $user->username; ?></h6>
+                            <small class="text-muted"><?php echo Utils::time_since($question->getCreatedAt()) ?></small>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-body">
                     <h5 class="card-title"><?php echo $question->getTitle(); ?></h5>
-                    <p class="card-text"><strong>Tags:</strong>
+                    <p class="card-text">
                         <?php foreach ($tagService->getTagsByQuestionID($question->getQuestionID()) as $tag): ?>
                             <span class="badge bg-primary"><?php echo $tag->getName(); ?></span>
                         <?php endforeach; ?>
                     </p>
                     <p class="card-text"><?php echo $question->getBody(); ?></p>
                     <p class="card-text"><small class="text-muted">Posted by
-                            <?php echo $userService->getById($question->getUserID())->getUsername(); ?> | Created at
-                            <?php echo $question->getCreatedAt(); ?></small></p>
+                            <?php echo $userService->getById($question->getUserID())->getUsername(); ?>
+                            <?php echo Utils::time_since($question->getCreatedAt()); ?></small></p>
                     <div class="btn-group gap-2" role="group" aria-label="Vote Question">
                         <form method="post">
                             <input type="hidden" name="question_id" value="<?php echo $question->getQuestionID(); ?>">
@@ -182,13 +202,42 @@ if (isset($_POST['delete_answer'])) {
                 </div>
             </div>
 
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Your Answer</h5>
+                    <form method="post">
+                        <input type="hidden" name="question_id" value="<?php echo $questionId ?>">
+                        <div class="form-group">
+                            <textarea class="form-control" name="answer" rows="3" placeholder="Enter your answer here"
+                                required></textarea>
+                        </div>
+                        <button type="submit" name="submit_answer" class="btn btn-primary mt-2">Post Your
+                            Answer</button>
+                    </form>
+                </div>
+            </div>
+
+
             <?php foreach ($answers as $ans): ?>
                 <div class="card bg-light mb-3">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <?php $user = $userService->getById($ans->getUserID()); ?>
+                            <?php $userImage = $user->getPhoto(); ?>
+                            <img src="<?php echo $userImage; ?>" alt="User Photo" class="rounded-circle me-2"
+                                style="width: 40px; height: 40px;">
+                            <div>
+                                <h6 class="mb-0"><?php echo $user->username; ?></h6>
+                                <small class="text-muted"><?php echo Utils::time_since($question->getCreatedAt()) ?></small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card-body">
                         <p class="card-text"><?php echo $ans->getBody(); ?></p>
                         <p class="card-text"><small class="text-muted">Posted by
-                                <?php echo $userService->getById($ans->getUserID())->getUsername(); ?> | Created at
-                                <?php echo $ans->getCreatedAt(); ?></small></p>
+                                <?php echo $userService->getById($ans->getUserID())->getUsername(); ?>
+                                <?php echo Utils::time_since($ans->getCreatedAt()); ?></small></p>
                         <div class="btn-group gap-2" role="group" aria-label="Vote Answer">
                             <form method="post">
                                 <input type="hidden" name="answer_id" value="<?php echo $ans->getAnswerId(); ?>">
@@ -223,19 +272,6 @@ if (isset($_POST['delete_answer'])) {
                 </div>
             <?php endforeach; ?>
 
-            <div class="card bg-light">
-                <div class="card-body">
-                    <h5 class="card-title">Your Answer</h5>
-                    <form method="post">
-                        <input type="hidden" name="question_id" value="<?php echo $questionId ?>">
-                        <div class="form-group">
-                            <textarea class="form-control" name="answer" rows="3" placeholder="Enter your answer here"
-                                required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Post Your Answer</button>
-                    </form>
-                </div>
-            </div>
 
         </div>
     </div>

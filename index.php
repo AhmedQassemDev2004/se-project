@@ -1,7 +1,9 @@
 <?php
 
 require_once __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/partials/header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/partials/header.php";
+}
 
 use App\Services\QuestionService;
 use App\Services\TagService;
@@ -16,13 +18,10 @@ $tags = $tagService->getAll();
 
 $userService = new UserService();
 
-// Retrieve selected tag from URL parameter
 $selected_tag_id = isset($_GET['tag']) ? $_GET['tag'] : null;
-// Get the questions based on the selected tag (if any)
 if ($selected_tag_id) {
     $questions = $questionService->getQuestionsByTagID($selected_tag_id);
 } else {
-    // Get all questions if no tag is selected
     $questions = $questionService->getAll();
 }
 
@@ -59,22 +58,23 @@ if ($selected_tag_id) {
                 <div class="text-center mt-3">
                     <a href="<?php echo $domain; ?>/AskQuestion.php" class="btn btn-primary mb-5"> <i
                             class="fas fa-plus"></i> Ask Question</a>
-
-                    <div class="input-group mb-3">
-                        <select class="form-control" id="tag" name="tag">
-                            <option value="">All Tags</option>
-                            <?php foreach ($tags as $tag): ?>
-                                <option value="<?php echo $tag->getTagID(); ?>" <?php echo ($selected_tag_id == $tag->getTagID()) ? 'selected' : ''; ?>><?php echo $tag->getName(); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="submit" class="btn btn-secondary">Filter</button>
-                    </div>
                 </div>
             <?php else: ?>
                 <div class="text-center mt-3">
-                    <button onclick="alert('Login to answer questions')" class="btn btn-primary">Ask Question</button>
+                    <button onclick="alert('Login to answer questions')" class="btn btn-primary mb-5">Ask Question</button>
                 </div>
             <?php endif; ?>
+
+
+            <form class="input-group mb-3">
+                <select class="form-control" id="tag" name="tag">
+                    <option value="">All Tags</option>
+                    <?php foreach ($tags as $tag): ?>
+                        <option value="<?php echo $tag->getTagID(); ?>" <?php echo ($selected_tag_id == $tag->getTagID()) ? 'selected' : ''; ?>><?php echo $tag->getName(); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-secondary">Filter</button>
+            </form>
             <!-- Display questions -->
             <?php foreach ($questions as $question): ?>
                 <div class="card mb-4">
@@ -90,7 +90,7 @@ if ($selected_tag_id) {
                     </div>
                     <div class="card-body">
                         <h5 class="card-title"><?php echo $question->getTitle(); ?></h5>
-                        <p class="card-text"><strong>Tags:</strong>
+                        <p class="card-text">
                             <?php foreach ($tagService->getTagsByQuestionID($question->getQuestionID()) as $tag): ?>
                                 <span class="badge text-bg-primary"><?php echo $tag->getName(); ?></span>
                             <?php endforeach; ?>

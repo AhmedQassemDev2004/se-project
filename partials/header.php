@@ -65,11 +65,30 @@ if ($authService->isLoggedIn()) {
                     <?php endif ?>
                 </ul>
                 <div class="dropdown m-2">
-                    <!-- Notifications dropdown code here -->
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="notificationsDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-bell"></i>
+                        <?php echo $unReadNotificationsCount; ?>
+                    </button>
+                    <?php if ($authService->isLoggedIn()): ?>
+                        <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
+                            <?php
+                            if (empty($unReadNotifications)) {
+                                echo "<li>0 notifcations</li>";
+                            } else {
+                                foreach ($unReadNotifications as $notification) {
+                                    echo "<li><a class='dropdown-item' href='" . $domain . "questions_details.php?id=" . $notification->getSourceId() . "'>" . $notification->displayMessage() . "</a></li>";
+                                }
+                            }
+                            ?>
+                        </ul>
+                    <?php endif; ?>
                 </div>
                 <form class="d-flex" role="search" action="<?php echo $domain; ?>/Search.php" method="GET"
                     id="search-form">
-                    <!-- Search form code here -->
+                    <input id="search-input" name="q" class="form-control me-2" type="search" placeholder="Search"
+                        aria-label="Search">
+                    <button class="btn btn-outline-success" id="search-btn" type="submit">Search</button>
                 </form>
             </div>
         </div>
@@ -94,10 +113,18 @@ if ($authService->isLoggedIn()) {
             </div>
         </div>
     </div>
-
+    <script src="<?php echo $domain; ?>/js/bootstrap.min.js"></script>
     <script src="<?php echo $domain; ?>/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            var logoutButton = document.querySelector('.logout-btn');
+            logoutButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                var logoutConfirmationModal = new bootstrap.Modal(document.getElementById(
+                    'logoutConfirmationModal'));
+                logoutConfirmationModal.show();
+            });
+
             var notificationsDropdown = document.getElementById('notificationsDropdown');
             notificationsDropdown.addEventListener('click', function (event) {
                 event.preventDefault();

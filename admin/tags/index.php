@@ -1,29 +1,22 @@
 <?php
-require_once __DIR__."/../../vendor/autoload.php";
-require_once __DIR__."/../partials/admin_header.php";
-
+require_once __DIR__ . "/../../vendor/autoload.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/admin_header.php";
+}
 
 use App\Services\TagService;
 
-// Create instance of TagService with $db as parameter
 $tagService = new TagService();
 
-// Get all tags
 $tags = $tagService->getAll();
 
-// Check if the delete button is clicked
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete_tag"]))
-{
-    // Get the tag ID to be deleted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete_tag"])) {
     $tag_id = $_POST["delete_tag"];
 
-    // Create instance of TagService with $db as parameter
     $tagService = new App\Services\TagService();
 
-    // Delete the tag
     $tagService->delete($tag_id);
 
-    // Redirect back to the page
     header("Location: index.php");
     exit();
 }
@@ -41,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete_tag"]))
                         <tr>
                             <td>Tag ID</td>
                             <td>Name</td>
+                            <td>Number of questions</td>
                             <td>Action</td> <!-- Add a new column for actions -->
                         </tr>
                         <?php
@@ -49,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete_tag"]))
                             echo "<tr>";
                             echo "<td>" . $tag->getTagId() . "</td>";
                             echo "<td>" . $tag->getName() . "</td>";
+                            echo "<td>" . $tagService->getTagQuestionCount($tag->getTagId()) . "</td>";
                             echo "<td class='d-flex justify-content-center gap-2'>";
                             // Create a form with delete button
                             echo "<form method='POST' onsubmit='return confirm(\"Are you sure you want to delete this tag?\")'>";

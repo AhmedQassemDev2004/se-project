@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . "/../../vendor/autoload.php";
 require_once __DIR__ . "/../../Utils/config.php";
-require_once __DIR__ . "/../partials/admin_header.php";
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    require_once __DIR__ . "/../partials/admin_header.php";
+}
 
 use App\Services\UserService;
 
@@ -19,10 +21,10 @@ $users = $userService->getAll();
         </div>
     <?php endif; ?>
 
-
-    <a href="GenerateReport.php" class="btn btn-primary">
-        Generate Report
+    <a href="<?php echo $domain; ?>admin/users/AddUser.php" class="btn btn-primary mb-3">
+        Add user
     </a>
+
 
     <table class="table table-striped">
         <thead>

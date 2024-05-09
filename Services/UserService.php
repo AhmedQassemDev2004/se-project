@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Utils\DBConnection;
 use PDO;
+use Exception;
 
 class UserService implements Service
 {
@@ -118,25 +119,23 @@ class UserService implements Service
     public function update(int $id, object $data): bool
     {
         try {
-            $query = "UPDATE Users SET username = :username, email = :email, password = :password, 
-                      photo = :photo, created_at = :created_at, reputations = :reputations, role = :role 
+            $query = "UPDATE Users SET username = :username, email = :email, 
+                      photo = :photo, role = :role, reputations = :reputations 
                       WHERE user_id = :user_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 'user_id' => $id,
                 'username' => isset($data->username) ? $data->username : null,
                 'email' => isset($data->email) ? $data->email : null,
-                'password' => isset($data->password) ? password_hash($data->password, PASSWORD_DEFAULT) : null, // Hash the new password
                 'photo' => isset($data->photo) ? $data->photo : null,
-                'created_at' => isset($data->created_at) ? $data->created_at : null,
-                'reputations' => isset($data->reputations) ? $data->reputations : 0,
-                'role' => isset($data->role) ? $data->role : null
+                'role' => isset($data->role) ? $data->role : null,
+                'reputations' => isset($data->reputations) ? $data->reputations : 0
             ]);
-
-            // If the execution reaches here without throwing an exception, 
-            // it means the query was executed successfully
             return true;
         } catch (\PDOException $e) {
+            echo "<pre>";
+            var_dump($e);
+            echo "</pre>";
             // If an exception occurs during the execution of the query,
             // return false indicating that the update was not successful
             return false;
@@ -240,7 +239,7 @@ class UserService implements Service
             return $users;
         } catch (\PDOException $e) {
             // Handle PDOException
-            throw new \Exception("Error fetching users with most badges: " . $e->getMessage());
+            throw new Exception("Error fetching users with most badges: " . $e->getMessage());
         }
     }
 
@@ -274,7 +273,24 @@ class UserService implements Service
         } catch (\PDOException $e) {
             // Handle PDOException
             // Log the error or throw a custom exception
-            throw new \Exception("Error fetching badges by user ID: " . $e->getMessage());
+            throw new Exception("Error fetching badges by user ID: " . $e->getMessage());
         }
     }
+
+    public function increaseReputations(int $userId, int $rep)
+    {
+        try {
+            $query = "UPDATE Users SET reputations = reputations + :rep WHERE user_id = :user_id";
+            $stmt = $this->db->prepare($query);
+
+            $stmt->execute(['rep' => $rep, 'user_id' => $userId]);
+
+            if ($stmt->rowCount() === 0) {
+                throw new Exception("User with ID $userId not found.");
+            }
+        } catch (Exception $ex) {
+            var_dump($ex);
+        }
+    }
+
 }

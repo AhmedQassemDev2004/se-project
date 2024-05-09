@@ -35,7 +35,7 @@ class AuthService
         if ($this->isLoggedIn()) {
             $username = $_SESSION['username'];
             $user = (new UserService())->getUserByUsername($username);
-            if($user) {
+            if ($user) {
                 return $user;
             } else {
                 $this->logout();

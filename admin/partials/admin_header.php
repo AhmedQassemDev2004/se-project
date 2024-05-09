@@ -27,7 +27,8 @@ $authService = new AuthService();
             <div class="collapse navbar-collapse" id="navbarScroll">
                 <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="<?php echo $domain; ?>">Home</a>
+                        <a class="nav-link active" aria-current="page"
+                            href="<?php echo $domain; ?>admin/index.php">Home</a>
                     </li>
                     <?php if (!$authService->isLoggedIn()): ?>
                         <li class="nav-item">
@@ -60,10 +61,6 @@ $authService = new AuthService();
                         </li>
                     <?php endif ?>
                 </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
         </div>
     </nav>
